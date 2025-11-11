@@ -5,6 +5,7 @@ const locationDisplay = document.getElementById('search-location');
 const weatherWidget = document.getElementById('weather-content');
 const mapContainer = 'map';
 const newsWidget = document.getElementById('news-content');
+const forecastWidget = document.getElementById('forecast-content');
 
 // --- Initialize the Map ---
 mapboxgl.accessToken = config.MAPBOX_KEY;
@@ -18,6 +19,7 @@ map.addControl(new mapboxgl.NavigationControl());
 
 // --- Load initial data for Singapore ---
 updateDashboard("Singapore");
+
 
 // --- Set up the search button click listener ---
 searchButton.addEventListener('click', () => {
@@ -50,12 +52,15 @@ function updateDashboard(query) {
             updateWeather(data);
 
             // 4. Update Map Widget
-            updateMap(lon, lat, data.name);
+            // updateMap(lon, lat, data.name); // Temporarily disabled
 
             // 5. Update Search Widget
-            updateLocation(data.name, data.sys.country);
-
-            updateNews(data.sys.country);
+            // updateLocation(data.name, data.sys.country); // Temporarily disabled
+            //6. Update News Widget
+            //updateNews(data.sys.country); //Temporarily disabled
+            
+            //7. Update Forecast Widget
+            updateForecast(lat, lon);
         })
         .catch(error => {
             // Handle errors (like "Location not found")
@@ -142,5 +147,63 @@ function updateNews(countryCode) {
         .catch(error => {
             console.error('Error fetching news data:', error);
             newsWidget.innerHTML = "<p>Could not load news feed.</p>";
+        });
+}
+
+// --- Forecast Logic (v4 - Simplest & Most Robust) ---
+function updateForecast(lat, lon) {
+    // This API gives a forecast for 5 days in 3-hour intervals
+    const forecastApiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
+
+    fetch(forecastApiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Forecast API response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // This is the console.log you are seeing
+            console.log("Forecast Data Received:", data); 
+
+            // Debug: Log the forecastWidget element
+            console.log("Forecast widget element:", forecastWidget);
+
+            // Clear old forecast
+            forecastWidget.innerHTML = "";
+
+            // A much simpler way to get 5 days:
+            // We filter the list to get only one entry per day.
+            // We'll take the 8th item (index 7), 16th (index 15), etc.
+            const dailyData = [];
+            for (let i = 7; i < data.list.length; i += 8) {
+                dailyData.push(data.list[i]);
+            }
+            
+            // Loop through our new 5-day list
+            dailyData.forEach(day => {
+                console.log("Processing forecast day:", day);
+                // Get the day of the week
+                const date = new Date(day.dt * 1000);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                const icon = day.weather[0].icon;
+                const temp = day.main.temp;
+
+                // Create the HTML for the day
+                const dayHTML = `
+                    <div class="forecast-day">
+                        <p>${dayName}</p>
+                        <img src="http://openweathermap.org/img/wn/${icon}.png" alt="${day.weather[0].description}">
+                        <p class="temp">${temp.toFixed(0)}°C</p>
+                    </div>
+                `;
+                
+                forecastWidget.innerHTML += dayHTML;
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching forecast data:', error);
+            forecastWidget.innerHTML = "<p>Could not load 5-day forecast.</p>";
         });
 }
