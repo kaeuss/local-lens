@@ -19,15 +19,26 @@ map.addControl(new mapboxgl.NavigationControl());
 
 // --- Initial Page Load ---
 document.addEventListener('DOMContentLoaded', () => {
-    updateDashboard("Singapore");
     
-    // --- Date ---
+    // 1. Load Dashboard
+    updateDashboard("Singapore");
+
+    // 2. Set the Date
     const dateDisplay = document.getElementById('current-date');
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateDisplay.textContent = now.toLocaleDateString('en-US', options); // e.g., "Wednesday, November 12, 2025"
-    // --- End of Date ---
+    dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+
+    // 3. Check for saved theme
+    const savedTheme = localStorage.getItem('theme');
+    const themeToggle = document.getElementById('theme-toggle'); // Get the button
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggle.textContent = "Toggle Light Mode";
+    }
 });
+
 
 
 // --- Set up the search button click listener ---
@@ -216,3 +227,20 @@ function updateForecast(lat, lon) {
             forecastWidget.innerHTML = "<p>Could not load 5-day forecast.</p>";
         });
 }
+
+// --- Theme Toggle Listener ---
+const themeToggle = document.getElementById('theme-toggle');
+
+themeToggle.addEventListener('click', () => {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+    
+    // Save the user's preference to localStorage
+    if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark');
+        themeToggle.textContent = "Toggle Light Mode";
+    } else {
+        localStorage.setItem('theme', 'light');
+        themeToggle.textContent = "Toggle Dark Mode";
+    }
+});
