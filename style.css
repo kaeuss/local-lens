@@ -1,0 +1,62 @@
+/* Basic reset and font */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 2rem;
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* A simple CSS Grid for the dashboard */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.widget {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.widget h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+/* This is for the Mapbox map */
+#map {
+    width: 100%;
+    height: 300px; /* You can change this */
+    border-radius: 8px;
+    background-color: #e0e0e0; /* Placeholder color */
+}
+
+/* --- Weather Widget Styles --- */
+#weather-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#weather-content .weather-info h3 {
+    font-size: 2.5rem; /* Makes the temperature big */
+    margin: 0;
+}
+
+#weather-content .weather-info p {
+    margin: 0;
+    text-transform: capitalize; /* e.g., "scattered clouds" -> "Scattered Clouds" */
+}
+
+#weather-content img {
+    width: 100px;
+    height: 100px;
+}
