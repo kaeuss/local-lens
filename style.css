@@ -92,3 +92,41 @@ header {
     margin: 0;
     color: #333;
 }
+
+/* --- News Widget Styles --- */
+#news-content {
+    max-height: 350px; /* Give it a max height */
+    overflow-y: auto;  /* Make it scrollable */
+    padding-right: 10px; /* Add padding for the scrollbar */
+}
+
+.news-article {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.news-article:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.news-article h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+}
+
+.news-article h3 a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.news-article h3 a:hover {
+    text-decoration: underline;
+}
+
+.news-article p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #555;
+}

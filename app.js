@@ -4,6 +4,7 @@ const searchButton = document.getElementById('search-button');
 const locationDisplay = document.getElementById('search-location');
 const weatherWidget = document.getElementById('weather-content');
 const mapContainer = 'map';
+const newsWidget = document.getElementById('news-content');
 
 // --- Initialize the Map ---
 mapboxgl.accessToken = config.MAPBOX_KEY;
@@ -53,6 +54,8 @@ function updateDashboard(query) {
 
             // 5. Update Search Widget
             updateLocation(data.name, data.sys.country);
+
+            updateNews(data.sys.country);
         })
         .catch(error => {
             // Handle errors (like "Location not found")
@@ -94,4 +97,50 @@ function updateMap(lon, lat) {
 
 function updateLocation(name, country) {
     locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
+}
+
+// --- News Widget Logic ---
+
+function updateNews(countryCode) {
+    // GNews uses lowercase country codes (e.g., 'sg')
+    const country = countryCode.toLowerCase(); 
+    
+    // Construct the GNews API URL
+    const newsApiUrl = `https://gnews.io/api/v4/top-headlines?country=${country}&token=${config.GNEWS_KEY}&max=10`;
+
+    // Fetch the news data
+    fetch(newsApiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('News API response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Clear old news
+            newsWidget.innerHTML = "";
+
+            if (data.articles && data.articles.length > 0) {
+                // Loop through the first 5 articles
+                data.articles.slice(0, 5).forEach(article => {
+                    
+                    // Create the HTML for each article
+                    const articleHTML = `
+                        <div class="news-article">
+                            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+                            <p>${article.source.name}</p>
+                        </div>
+                    `;
+                    
+                    // Add the new article to the widget
+                    newsWidget.innerHTML += articleHTML;
+                });
+            } else {
+                newsWidget.innerHTML = "<p>No recent news found.</p>";
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching news data:', error);
+            newsWidget.innerHTML = "<p>Could not load news feed.</p>";
+        });
 }
