@@ -61,7 +61,7 @@ header {
     height: 100px;
 }
 
-/* --- Places Widget Styles --- */
+/* --- Search Widget Styles --- */
 .search-container {
     display: flex;
     gap: 0.5rem;
@@ -88,25 +88,7 @@ header {
     background-color: #0056b3;
 }
 
-/* Styles for the results list */
-#places-content ul {
-    list-style: none;
-    padding-left: 0;
+#search-location h3 {
     margin: 0;
-}
-
-#places-content li {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #eee;
-    font-size: 0.9rem;
-}
-
-#places-content li:last-child {
-    border-bottom: none;
-}
-
-#places-content li strong {
-    font-size: 1rem;
     color: #333;
-    display: block; /* Makes the name appear on its own line */
 }

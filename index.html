@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+
+    
+</head>
+
+    
 </head>
 <body>
 
@@ -17,6 +22,16 @@
 
     <main class="dashboard-grid">
         
+        <section class="widget" id="search-widget">
+            <h2>Location Search</h2>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Enter a city or place...">
+                <button id="search-button">Search</button>
+            </div>
+            <div id="search-location">
+                </div>
+        </section>
+
         <section class="widget" id="weather-widget">
             <h2>Current Weather</h2>
             <div id="weather-content">
@@ -26,18 +41,6 @@
         <section class="widget" id="map-widget">
             <h2>Local Map</h2>
             <div id="map"></div>
-        </section>
-
-        <section class="widget" id="places-widget">
-            <h2>What's Nearby?</h2>
-            
-            <div class="search-container">
-                <input type="text" id="places-search-input" placeholder="E.g., Kopitiam, Clinic, Park...">
-                <button id="places-search-button">Search</button>
-            </div>
-
-            <div id="places-content">
-                </div>
         </section>
 
     </main>
