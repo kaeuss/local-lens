@@ -17,8 +17,17 @@ const map = new mapboxgl.Map({
 });
 map.addControl(new mapboxgl.NavigationControl());
 
-// --- Load initial data for Singapore ---
-updateDashboard("Singapore");
+// --- Initial Page Load ---
+document.addEventListener('DOMContentLoaded', () => {
+    updateDashboard("Singapore");
+    
+    // --- Date ---
+    const dateDisplay = document.getElementById('current-date');
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    dateDisplay.textContent = now.toLocaleDateString('en-US', options); // e.g., "Wednesday, November 12, 2025"
+    // --- End of Date ---
+});
 
 
 // --- Set up the search button click listener ---
