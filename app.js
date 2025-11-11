@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Check for saved theme
     const savedTheme = localStorage.getItem('theme');
-    const themeToggle = document.getElementById('theme-toggle'); // Get the button
+    const themeToggleInput = document.getElementById('theme-toggle-input'); // Find new checkbox
     
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-        themeToggle.textContent = "Toggle Light Mode";
+        themeToggleInput.checked = true; // Set the switch to "on"
     }
 });
 
@@ -229,18 +229,18 @@ function updateForecast(lat, lon) {
 }
 
 // --- Theme Toggle Listener ---
-const themeToggle = document.getElementById('theme-toggle');
+const themeToggleInput = document.getElementById('theme-toggle-input');
 
-themeToggle.addEventListener('click', () => {
+themeToggleInput.addEventListener('change', () => {
     const body = document.body;
-    body.classList.toggle('dark-mode');
-    
-    // Save the user's preference to localStorage
-    if (body.classList.contains('dark-mode')) {
+
+    if (themeToggleInput.checked) {
+        // If the switch is "on" (checked)
+        body.classList.add('dark-mode');
         localStorage.setItem('theme', 'dark');
-        themeToggle.textContent = "Toggle Light Mode";
     } else {
+        // If the switch is "off" (unchecked)
+        body.classList.remove('dark-mode');
         localStorage.setItem('theme', 'light');
-        themeToggle.textContent = "Toggle Dark Mode";
     }
 });

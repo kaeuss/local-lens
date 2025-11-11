@@ -173,18 +173,6 @@ header {
 
 /* --- Dark Mode Styles --- */
 
-/* Basic style for the toggle button */
-#theme-toggle {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    background-color: #f8f9fa;
-    color: #333;
-    border-radius: 4px;
-    cursor: pointer;
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-}
 
 /* This is what changes when dark mode is ON */
 
@@ -213,12 +201,6 @@ body.dark-mode .forecast-day .temp {
     color: #f1f1f1;
 }
 
-body.dark-mode #theme-toggle {
-    background-color: #555;
-    color: #f1f1f1;
-    border-color: #666;
-}
-
 body.dark-mode .news-article h3 a {
     color: #58a6ff;
 }
@@ -227,4 +209,61 @@ body.dark-mode .search-container input {
     background-color: #333;
     border-color: #555;
     color: #f1f1f1;
+}
+
+/* --- Theme Toggle Switch Styles --- */
+.switch {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+/* Hide the default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The "track" of the slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+/* The "ball" of the slider */
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* --- Toggle "On" State --- */
+input:checked + .slider {
+    background-color: #007bff; /* Blue when on */
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px); /* This moves the ball to the right */
+}
+
+/* --- Dark Mode Style for the switch --- */
+body.dark-mode .slider {
+    background-color: #555; /* Darker track when off */
 }
