@@ -53,10 +53,13 @@ searchButton.addEventListener('click', () => {
 
 // --- Main Function to Update Everything ---
 function updateDashboard(query) {
-    // 1. Create the API URL for OpenWeatherMap
+    // 1. Show loading spinner in the weather widget immediately
+    showLoading(weatherWidget);
+    
+    // 2. Create the API URL for OpenWeatherMap
     const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
-    // 2. Fetch the data
+    // 3. Fetch the data
     fetch(weatherApiUrl)
         .then(response => {
             if (!response.ok) {
@@ -65,30 +68,23 @@ function updateDashboard(query) {
             return response.json();
         })
         .then(data => {
-            // We have good data!
-            console.log(data);
             const lat = data.coord.lat;
             const lon = data.coord.lon;
 
-            // 3. Update Weather Widget
-            updateWeather(data);
-
-            // 4. Update Map Widget
-            // updateMap(lon, lat, data.name); // Temporarily disabled
-
-            // 5. Update Search Widget
-            // updateLocation(data.name, data.sys.country); // Temporarily disabled
-            //6. Update News Widget
-            //updateNews(data.sys.country); //Temporarily disabled
+            // Update Widgets
+            updateWeather(data); // This removes the spinner and shows weather
+            updateMap(lon, lat, data.name);
+            updateLocation(data.name, data.sys.country);
             
-            //7. Update Forecast Widget
+            // Trigger other updates
+            updateNews(data.sys.country);
             updateForecast(lat, lon);
         })
         .catch(error => {
-            // Handle errors (like "Location not found")
             console.error('Error fetching data:', error);
-            locationDisplay.innerHTML = `<h3>Location not found.</h3>`;
-            weatherWidget.innerHTML = `<p>Please try a new search.</p>`;
+            // Show a nice error message in the main widget
+            showError(weatherWidget, "Location not found. Please try again.");
+            locationDisplay.innerHTML = ""; // Clear location text
         });
 }
 
@@ -126,93 +122,71 @@ function updateLocation(name, country) {
     locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
 }
 
-// --- News Widget Logic ---
-
+// --- News Widget Logic (With Spinner) ---
 function updateNews(countryCode) {
-    // GNews uses lowercase country codes (e.g., 'sg')
+    // 1. Show loading spinner
+    showLoading(newsWidget);
+
     const country = countryCode.toLowerCase(); 
-    
-    // Construct the GNews API URL
     const newsApiUrl = `https://gnews.io/api/v4/top-headlines?country=${country}&token=${config.GNEWS_KEY}&max=10`;
 
-    // Fetch the news data
     fetch(newsApiUrl)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('News API response was not ok');
-            }
+            if (!response.ok) throw new Error('News API error');
             return response.json();
         })
         .then(data => {
-            // Clear old news
+            // Clear spinner
             newsWidget.innerHTML = "";
 
             if (data.articles && data.articles.length > 0) {
-                // Loop through the first 5 articles
                 data.articles.slice(0, 5).forEach(article => {
-                    
-                    // Create the HTML for each article
                     const articleHTML = `
                         <div class="news-article">
                             <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
                             <p>${article.source.name}</p>
                         </div>
                     `;
-                    
-                    // Add the new article to the widget
                     newsWidget.innerHTML += articleHTML;
                 });
             } else {
-                newsWidget.innerHTML = "<p>No recent news found.</p>";
+                showError(newsWidget, "No news found for this region.");
             }
         })
         .catch(error => {
-            console.error('Error fetching news data:', error);
-            newsWidget.innerHTML = "<p>Could not load news feed.</p>";
+            console.error('Error fetching news:', error);
+            // This handles the 403 or 404 errors gracefully
+            showError(newsWidget, "Could not load news (API Limit or Error).");
         });
 }
 
-// --- Forecast Logic (v4 - Simplest & Most Robust) ---
+// --- Forecast Logic (v5 - With Spinner) ---
 function updateForecast(lat, lon) {
-    // This API gives a forecast for 5 days in 3-hour intervals
+    // 1. Show loading spinner
+    showLoading(forecastWidget);
+
     const forecastApiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
     fetch(forecastApiUrl)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Forecast API response was not ok');
-            }
+            if (!response.ok) throw new Error('Forecast API error');
             return response.json();
         })
         .then(data => {
-            // This is the console.log you are seeing
-            console.log("Forecast Data Received:", data); 
-
-            // Debug: Log the forecastWidget element
-            console.log("Forecast widget element:", forecastWidget);
-
-            // Clear old forecast
+            // Clear spinner
             forecastWidget.innerHTML = "";
-
-            // A much simpler way to get 5 days:
-            // We filter the list to get only one entry per day.
-            // We'll take the 8th item (index 7), 16th (index 15), etc.
+            
             const dailyData = [];
             for (let i = 7; i < data.list.length; i += 8) {
                 dailyData.push(data.list[i]);
             }
             
-            // Loop through our new 5-day list
             dailyData.forEach(day => {
-                console.log("Processing forecast day:", day);
-                // Get the day of the week
                 const date = new Date(day.dt * 1000);
                 const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                
                 const icon = day.weather[0].icon;
                 const temp = day.main.temp;
 
-                // Create the HTML for the day
                 const dayHTML = `
                     <div class="forecast-day">
                         <p>${dayName}</p>
@@ -220,13 +194,12 @@ function updateForecast(lat, lon) {
                         <p class="temp">${temp.toFixed(0)}°C</p>
                     </div>
                 `;
-                
                 forecastWidget.innerHTML += dayHTML;
             });
         })
         .catch(error => {
-            console.error('Error fetching forecast data:', error);
-            forecastWidget.innerHTML = "<p>Could not load 5-day forecast.</p>";
+            console.error('Error fetching forecast:', error);
+            showError(forecastWidget, "Could not load forecast.");
         });
 }
 
@@ -302,4 +275,14 @@ function updateDashboardByCoords(lat, lon) {
             console.error('Error fetching data:', error);
             alert("Could not load weather for your location.");
         });
+}
+
+// --- UI Helper Functions ---
+
+function showLoading(element) {
+    element.innerHTML = '<div class="spinner"></div>';
+}
+
+function showError(element, message) {
+    element.innerHTML = `<div class="error-message">⚠️ ${message}</div>`;
 }

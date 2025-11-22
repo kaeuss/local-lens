@@ -305,3 +305,33 @@ body.dark-mode .search-container input {
 body.dark-mode .search-container input::placeholder {
     color: #cccccc; /* Light grey placeholder so it's readable */
 }
+
+/* --- Loading Spinner & Error Styles --- */
+
+.spinner {
+    border: 4px solid #f3f3f3; /* Light grey background */
+    border-top: 4px solid #007bff; /* Blue spinner color */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto; /* Center it */
+    display: block;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    color: #dc3545; /* Red text */
+    text-align: center;
+    font-weight: bold;
+    padding: 1rem;
+}
+
+/* Dark mode adjustment for error text */
+body.dark-mode .error-message {
+    color: #ff6b6b;
+}
