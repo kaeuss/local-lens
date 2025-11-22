@@ -101,7 +101,7 @@ Because this project relies on API keys which are **not** included in the reposi
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/local-lens.git](https://github.com/YOUR_USERNAME/local-lens.git)
+    git clone [https://github.com/kaeuss/local-lens.git](https://github.com/kaeuss/local-lens.git)
     ```
 2.  **Create the config file:**
     Create a file named `config.js` in the root folder.
