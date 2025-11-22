@@ -380,3 +380,55 @@ body.dark-mode .error-message {
     #geo-button { flex: 1; justify-content: center; height: 40px; }
     #search-button { flex: 3; height: 40px; }
 }
+
+/* --- Search Suggestions Dropdown --- */
+
+/* Make the container capable of holding the floating list */
+.search-container {
+    position: relative; /* This allows the list to position itself relative to this box */
+}
+
+#suggestions-list {
+    position: absolute;
+    top: 100%; /* Push it right below the input */
+    left: 0;
+    background-color: white;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%; /* Match width of the container */
+    max-width: 300px; /* Don't let it get too wide on desktop */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 0 0 4px 4px;
+    z-index: 1000; /* Ensure it sits on top of everything */
+    max-height: 200px;
+    overflow-y: auto; /* Scroll if too many results */
+    display: none; /* Hidden by default */
+}
+
+#suggestions-list li {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    text-align: left;
+}
+
+#suggestions-list li:hover {
+    background-color: #f0f0f0;
+}
+
+/* Dark mode support */
+body.dark-mode #suggestions-list {
+    background-color: #444;
+    color: white;
+}
+
+body.dark-mode #suggestions-list li {
+    border-bottom: 1px solid #555;
+    color: white;
+}
+
+body.dark-mode #suggestions-list li:hover {
+    background-color: #555;
+}

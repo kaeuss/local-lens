@@ -286,3 +286,63 @@ function showLoading(element) {
 function showError(element, message) {
     element.innerHTML = `<div class="error-message">⚠️ ${message}</div>`;
 }
+
+// --- Autocomplete Logic ---
+
+const suggestionsList = document.getElementById('suggestions-list');
+
+// Listen for typing in the search box
+searchInput.addEventListener('input', async () => {
+    const query = searchInput.value;
+
+    // Only search if user types 3 or more letters (saves API calls)
+    if (query.length < 3) {
+        suggestionsList.style.display = 'none';
+        return;
+    }
+
+    // Use OpenWeatherMap Geocoding API
+    const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${config.OPENWEATHER_KEY}`;
+
+    try {
+        const response = await fetch(geoUrl);
+        const data = await response.json();
+
+        // Clear old suggestions
+        suggestionsList.innerHTML = "";
+
+        if (data.length > 0) {
+            suggestionsList.style.display = 'block';
+            
+            // Loop through results
+            data.forEach(place => {
+                const li = document.createElement('li');
+                // Show City, State (if exists), Country
+                const stateInfo = place.state ? `, ${place.state}` : '';
+                li.textContent = `${place.name}${stateInfo}, ${place.country}`;
+                
+                // When clicked, fill the box and search
+                li.addEventListener('click', () => {
+                    searchInput.value = place.name; // Fill input
+                    suggestionsList.style.display = 'none'; // Hide list
+                    
+                    // Run the dashboard update using the coordinates we just found!
+                    updateDashboardByCoords(place.lat, place.lon);
+                });
+
+                suggestionsList.appendChild(li);
+            });
+        } else {
+            suggestionsList.style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Error fetching suggestions:", error);
+    }
+});
+
+// Hide the list if user clicks somewhere else on the screen
+document.addEventListener('click', (e) => {
+    if (e.target !== searchInput && e.target !== suggestionsList) {
+        suggestionsList.style.display = 'none';
+    }
+});
