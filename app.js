@@ -1,11 +1,13 @@
 // --- Get references to all our HTML elements ---
 const searchInput = document.getElementById('search-input');
 const searchButton = document.getElementById('search-button');
+const geoButton = document.getElementById('geo-button');
 const locationDisplay = document.getElementById('search-location');
 const weatherWidget = document.getElementById('weather-content');
 const mapContainer = 'map';
 const newsWidget = document.getElementById('news-content');
 const forecastWidget = document.getElementById('forecast-content');
+
 
 // --- Initialize the Map ---
 mapboxgl.accessToken = config.MAPBOX_KEY;
@@ -244,3 +246,60 @@ themeToggleInput.addEventListener('change', () => {
         localStorage.setItem('theme', 'light');
     }
 });
+
+// --- Geolocation Logic ---
+
+geoButton.addEventListener('click', () => {
+    // Check if Geolocation is supported
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+    }
+
+    // Ask for location
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            // Success! We have coordinates.
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Call our new function to handle coords
+            updateDashboardByCoords(lat, lon);
+        },
+        (error) => {
+            // Error (User denied permission, etc.)
+            console.error("Error getting location:", error);
+            alert("Unable to retrieve your location. Please allow location access.");
+        }
+    );
+});
+
+// Special function to fetch weather using Coordinates instead of City Name
+function updateDashboardByCoords(lat, lon) {
+    // URL uses lat/lon instead of q={city}
+    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
+
+    fetch(weatherApiUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('Location not found');
+            return response.json();
+        })
+        .then(data => {
+            console.log("Location Data:", data);
+            
+            // Update all the widgets using the data we got back
+            // (We can reuse all your existing helper functions!)
+            updateWeather(data);
+            updateMap(lon, lat, data.name);
+            updateLocation(data.name, data.sys.country);
+            
+            // Update News and Forecast
+            // Note: Check if updateNews is enabled in your code
+            // updateNews(data.sys.country); 
+            updateForecast(lat, lon);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            alert("Could not load weather for your location.");
+        });
+}
