@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lens Dashbaord</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
     <link rel="stylesheet" href="style.css">
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
@@ -19,7 +20,7 @@
         <h1>Lens Dashboard</h1>
         <p>Your Personal Forecaster</p>
         <p id="current-date"></p>
-            <label class="switch" for="theme-toggle-input" title="Toggle Dark/Light Mode">
+            <label class="switch" for="theme-toggle-input" title="Toggle dark/light mode">
             <input type="checkbox" id="theme-toggle-input">
             <span class="slider"></span>
             </label>
@@ -30,7 +31,7 @@
         <section class="widget" id="search-widget">
             <h2>Location Search</h2>
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="Enter a city or place in SG...">
+                <input type="text" id="search-input" placeholder="Enter a City or Place">
                 <button id="geo-button" title="Use my current location">📍</button>
                 <button id="search-button">Search</button>
                 </div>

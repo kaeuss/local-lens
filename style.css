@@ -211,14 +211,13 @@ body.dark-mode .search-container input {
     color: #f1f1f1;
 }
 
-/* --- Theme Toggle Switch Styles --- */
+/* CLEANED UP SWITCH CLASS */
 .switch {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
+    /* REMOVED position, top, right from here */
     display: inline-block;
     width: 60px;
     height: 34px;
+    position: relative; /* Add this just to be safe */
 }
 
 /* Hide the default HTML checkbox */
@@ -334,4 +333,50 @@ body.dark-mode .search-container input::placeholder {
 /* Dark mode adjustment for error text */
 body.dark-mode .error-message {
     color: #ff6b6b;
+}
+
+/* --- Wrapper Layout Logic --- */
+
+/* DESKTOP: The wrapper floats in the top right */
+#switch-wrapper {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+}
+
+/* MOBILE: The wrapper centers itself */
+@media (max-width: 600px) {
+    
+    /* Reset the header to just be a normal column */
+    header {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 1rem;
+    }
+
+    /* Move the wrapper to the center position */
+    #switch-wrapper {
+        position: static; /* Stop floating */
+        width: 100%;      /* Take full width */
+        display: flex;    /* Use flexbox to center the child */
+        justify-content: center; /* Center the switch horizontally */
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+    
+    /* Ensure the switch stays small */
+    .switch {
+        flex-shrink: 0; /* Do not let it squish */
+    }
+
+    /* Keep the Search Button fixes */
+    .search-container {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .search-container input { width: 100%; margin-bottom: 0; }
+    #geo-button { flex: 1; justify-content: center; height: 40px; }
+    #search-button { flex: 3; height: 40px; }
 }
