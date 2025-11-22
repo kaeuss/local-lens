@@ -8,6 +8,8 @@ const mapContainer = 'map';
 const newsWidget = document.getElementById('news-content');
 const forecastWidget = document.getElementById('forecast-content');
 
+// Global variable to track the map marker (so we can remove old ones)
+let currentMarker = null;
 
 // --- Initialize the Map ---
 mapboxgl.accessToken = config.MAPBOX_KEY;
@@ -33,15 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Check for saved theme
     const savedTheme = localStorage.getItem('theme');
-    const themeToggleInput = document.getElementById('theme-toggle-input'); // Find new checkbox
+    const themeToggleInput = document.getElementById('theme-toggle-input'); 
     
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-        themeToggleInput.checked = true; // Set the switch to "on"
+        themeToggleInput.checked = true; 
     }
 });
-
-
 
 // --- Set up the search button click listener ---
 searchButton.addEventListener('click', () => {
@@ -53,13 +53,13 @@ searchButton.addEventListener('click', () => {
 
 // --- Main Function to Update Everything ---
 function updateDashboard(query) {
-    // 1. Show loading spinner in the weather widget immediately
+    // 1. Show loading spinner
     showLoading(weatherWidget);
     
-    // 2. Create the API URL for OpenWeatherMap
+    // 2. API URL
     const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
-    // 3. Fetch the data
+    // 3. Fetch
     fetch(weatherApiUrl)
         .then(response => {
             if (!response.ok) {
@@ -72,19 +72,21 @@ function updateDashboard(query) {
             const lon = data.coord.lon;
 
             // Update Widgets
-            updateWeather(data); // This removes the spinner and shows weather
-            updateMap(lon, lat, data.name);
+            updateWeather(data); 
+            
+            // UPDATED: Pass temp and description to the map for the popup
+            updateMap(lon, lat, data.name, data.main.temp, data.weather[0].description);
+            
             updateLocation(data.name, data.sys.country);
             
             // Trigger other updates
-            updateNews(data.sys.country);
+            updateNews(data.name); // Pass City Name for Global News
             updateForecast(lat, lon);
         })
         .catch(error => {
             console.error('Error fetching data:', error);
-            // Show a nice error message in the main widget
             showError(weatherWidget, "Location not found. Please try again.");
-            locationDisplay.innerHTML = ""; // Clear location text
+            locationDisplay.innerHTML = ""; 
         });
 }
 
@@ -105,16 +107,36 @@ function updateWeather(data) {
     weatherWidget.innerHTML = weatherHTML;
 }
 
-function updateMap(lon, lat) {
-    // Use 'flyTo' to animate the map
+// UPDATED MAP FUNCTION (With Popup)
+function updateMap(lon, lat, cityName, temp, description) {
+    // 1. Fly to the new location
     map.flyTo({
         center: [lon, lat],
-        zoom: 12 // Zoom in a bit closer
+        zoom: 10,
+        essential: true
     });
 
-    // (Optional) Add a marker at the new location
-    new mapboxgl.Marker()
+    // 2. Remove the old marker if it exists
+    if (currentMarker) {
+        currentMarker.remove();
+    }
+
+    // 3. Create a custom popup with Weather Info
+    const popupHTML = `
+        <div style="text-align: center; color: #333;">
+            <h3>${cityName}</h3>
+            <p><strong>${temp.toFixed(1)}°C</strong></p>
+            <p style="text-transform: capitalize;">${description}</p>
+        </div>
+    `;
+
+    const popup = new mapboxgl.Popup({ offset: 25 })
+        .setHTML(popupHTML);
+
+    // 4. Add the new marker with the popup
+    currentMarker = new mapboxgl.Marker({ color: "#007bff" }) 
         .setLngLat([lon, lat])
+        .setPopup(popup) 
         .addTo(map);
 }
 
@@ -122,13 +144,12 @@ function updateLocation(name, country) {
     locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
 }
 
-// --- News Widget Logic (With Spinner) ---
-function updateNews(countryCode) {
-    // 1. Show loading spinner
+// --- Global News Logic ---
+function updateNews(query) {
     showLoading(newsWidget);
 
-    const country = countryCode.toLowerCase(); 
-    const newsApiUrl = `https://gnews.io/api/v4/top-headlines?country=${country}&token=${config.GNEWS_KEY}&max=10`;
+    // Search for news about the City Name (Global Scope)
+    const newsApiUrl = `https://gnews.io/api/v4/search?q=${query}&lang=en&sortby=publishedAt&token=${config.GNEWS_KEY}&max=5`;
 
     fetch(newsApiUrl)
         .then(response => {
@@ -136,33 +157,35 @@ function updateNews(countryCode) {
             return response.json();
         })
         .then(data => {
-            // Clear spinner
             newsWidget.innerHTML = "";
 
             if (data.articles && data.articles.length > 0) {
-                data.articles.slice(0, 5).forEach(article => {
+                data.articles.forEach(article => {
+                    const image = article.image || 'https://via.placeholder.com/150?text=News';
+                    
                     const articleHTML = `
                         <div class="news-article">
-                            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
-                            <p>${article.source.name}</p>
+                            <div class="news-image" style="background-image: url('${image}')"></div>
+                            <div class="news-text">
+                                <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+                                <p>${article.source.name} • ${new Date(article.publishedAt).toLocaleDateString()}</p>
+                            </div>
                         </div>
                     `;
                     newsWidget.innerHTML += articleHTML;
                 });
             } else {
-                showError(newsWidget, "No news found for this region.");
+                showError(newsWidget, `No recent news found for ${query}.`);
             }
         })
         .catch(error => {
             console.error('Error fetching news:', error);
-            // This handles the 403 or 404 errors gracefully
-            showError(newsWidget, "Could not load news (API Limit or Error).");
+            showError(newsWidget, "Could not load news.");
         });
 }
 
-// --- Forecast Logic (v5 - With Spinner) ---
+// --- Forecast Logic ---
 function updateForecast(lat, lon) {
-    // 1. Show loading spinner
     showLoading(forecastWidget);
 
     const forecastApiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
@@ -173,7 +196,6 @@ function updateForecast(lat, lon) {
             return response.json();
         })
         .then(data => {
-            // Clear spinner
             forecastWidget.innerHTML = "";
             
             const dailyData = [];
@@ -210,11 +232,9 @@ themeToggleInput.addEventListener('change', () => {
     const body = document.body;
 
     if (themeToggleInput.checked) {
-        // If the switch is "on" (checked)
         body.classList.add('dark-mode');
         localStorage.setItem('theme', 'dark');
     } else {
-        // If the switch is "off" (unchecked)
         body.classList.remove('dark-mode');
         localStorage.setItem('theme', 'light');
     }
@@ -223,33 +243,27 @@ themeToggleInput.addEventListener('change', () => {
 // --- Geolocation Logic ---
 
 geoButton.addEventListener('click', () => {
-    // Check if Geolocation is supported
     if (!navigator.geolocation) {
         alert("Geolocation is not supported by your browser.");
         return;
     }
 
-    // Ask for location
     navigator.geolocation.getCurrentPosition(
         (position) => {
-            // Success! We have coordinates.
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            
-            // Call our new function to handle coords
+            // Call our special function to handle coords
             updateDashboardByCoords(lat, lon);
         },
         (error) => {
-            // Error (User denied permission, etc.)
             console.error("Error getting location:", error);
             alert("Unable to retrieve your location. Please allow location access.");
         }
     );
 });
 
-// Special function to fetch weather using Coordinates instead of City Name
+// Special function to fetch weather using Coordinates
 function updateDashboardByCoords(lat, lon) {
-    // URL uses lat/lon instead of q={city}
     const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
     fetch(weatherApiUrl)
@@ -260,15 +274,16 @@ function updateDashboardByCoords(lat, lon) {
         .then(data => {
             console.log("Location Data:", data);
             
-            // Update all the widgets using the data we got back
-            // (We can reuse all your existing helper functions!)
             updateWeather(data);
-            updateMap(lon, lat, data.name);
+            
+            // UPDATED: Pass temp/desc for Map Popup
+            updateMap(lon, lat, data.name, data.main.temp, data.weather[0].description);
+            
             updateLocation(data.name, data.sys.country);
             
-            // Update News and Forecast
-            // Note: Check if updateNews is enabled in your code
-            // updateNews(data.sys.country); 
+            // UPDATED: Update News using the City Name we found
+            updateNews(data.name); 
+            
             updateForecast(lat, lon);
         })
         .catch(error => {
@@ -291,42 +306,33 @@ function showError(element, message) {
 
 const suggestionsList = document.getElementById('suggestions-list');
 
-// Listen for typing in the search box
 searchInput.addEventListener('input', async () => {
     const query = searchInput.value;
 
-    // Only search if user types 3 or more letters (saves API calls)
     if (query.length < 3) {
         suggestionsList.style.display = 'none';
         return;
     }
 
-    // Use OpenWeatherMap Geocoding API
     const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${config.OPENWEATHER_KEY}`;
 
     try {
         const response = await fetch(geoUrl);
         const data = await response.json();
 
-        // Clear old suggestions
         suggestionsList.innerHTML = "";
 
         if (data.length > 0) {
             suggestionsList.style.display = 'block';
             
-            // Loop through results
             data.forEach(place => {
                 const li = document.createElement('li');
-                // Show City, State (if exists), Country
                 const stateInfo = place.state ? `, ${place.state}` : '';
                 li.textContent = `${place.name}${stateInfo}, ${place.country}`;
                 
-                // When clicked, fill the box and search
                 li.addEventListener('click', () => {
-                    searchInput.value = place.name; // Fill input
-                    suggestionsList.style.display = 'none'; // Hide list
-                    
-                    // Run the dashboard update using the coordinates we just found!
+                    searchInput.value = place.name; 
+                    suggestionsList.style.display = 'none'; 
                     updateDashboardByCoords(place.lat, place.lon);
                 });
 
@@ -340,7 +346,6 @@ searchInput.addEventListener('input', async () => {
     }
 });
 
-// Hide the list if user clicks somewhere else on the screen
 document.addEventListener('click', (e) => {
     if (e.target !== searchInput && e.target !== suggestionsList) {
         suggestionsList.style.display = 'none';

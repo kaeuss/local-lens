@@ -18,7 +18,7 @@
 
     <header>
         <h1>Lens Dashboard</h1>
-        <p>Your Personal Forecaster</p>
+        <p>Your Personal KPO API</p>
         <p id="current-date"></p>
             <label class="switch" for="theme-toggle-input" title="Toggle dark/light mode">
             <input type="checkbox" id="theme-toggle-input">
@@ -31,7 +31,7 @@
         <section class="widget" id="search-widget">
             <h2>Location Search</h2>
             <div class="search-container">
-                <input type="text" id="search-input" placeholder="Enter a City or Place">
+                <input type="text" id="search-input" placeholder="Enter any city (e.g. Tokyo, Paris)..." autocomplete="off">
                 <ul id="suggestions-list"></ul>
                 <button id="geo-button" title="Use my current location">📍</button>
                 <button id="search-button">Search</button>
@@ -50,13 +50,13 @@
         </section>
 
         <section class="widget" id="news-widget">
-            <h2>Local News</h2>
+            <h2>Latest News</h2>
             <div id="news-content">
                 </div>
         </section>
 
         <section class="widget" id="map-widget">
-            <h2>Local Map</h2>
+            <h2>Map Preview</h2>
             <div id="map"></div>
         </section>
 

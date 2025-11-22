@@ -432,3 +432,42 @@ body.dark-mode #suggestions-list li {
 body.dark-mode #suggestions-list li:hover {
     background-color: #555;
 }
+
+/* --- Enhanced Global News Styles --- */
+.news-article {
+    display: flex;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    align-items: start;
+}
+
+.news-image {
+    width: 80px;
+    height: 60px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 4px;
+    flex-shrink: 0; /* Don't squish the image */
+    background-color: #ccc;
+}
+
+.news-text h3 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    line-height: 1.3;
+}
+
+.news-text p {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Dark Mode Adjustments */
+body.dark-mode .news-article {
+    border-bottom-color: #444;
+}
+body.dark-mode .news-text p {
+    color: #aaa;
+}
