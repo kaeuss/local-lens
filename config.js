@@ -1,0 +1,6 @@
+// Protecting my API key 
+const config = {
+    OPENWEATHER_KEY: "6258bc5fc08056639020b0999c01ba36",
+    MAPBOX_KEY: "pk.eyJ1Ijoia2FldXNkZXYiLCJhIjoiY21odW5yd2RrMDFvejJtcHFtMG5ueWZ6MCJ9.xTxlLzlIqqdrGT86GNI02Q",
+    GNEWS_KEY: "4277d7472c2802f2a2f443c79e270e38"
+};
