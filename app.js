@@ -144,11 +144,10 @@ function updateLocation(name, country) {
     locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
 }
 
-// --- Global News Logic ---
+// --- Global News Logic (With Backup Data) ---
 function updateNews(query) {
     showLoading(newsWidget);
 
-    // Search for news about the City Name (Global Scope)
     const newsApiUrl = `https://gnews.io/api/v4/search?q=${query}&lang=en&sortby=publishedAt&token=${config.GNEWS_KEY}&max=5`;
 
     fetch(newsApiUrl)
@@ -160,28 +159,64 @@ function updateNews(query) {
             newsWidget.innerHTML = "";
 
             if (data.articles && data.articles.length > 0) {
-                data.articles.forEach(article => {
-                    const image = article.image || 'https://via.placeholder.com/150?text=News';
-                    
-                    const articleHTML = `
-                        <div class="news-article">
-                            <div class="news-image" style="background-image: url('${image}')"></div>
-                            <div class="news-text">
-                                <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
-                                <p>${article.source.name} • ${new Date(article.publishedAt).toLocaleDateString()}</p>
-                            </div>
-                        </div>
-                    `;
-                    newsWidget.innerHTML += articleHTML;
-                });
+                renderArticles(data.articles);
             } else {
                 showError(newsWidget, `No recent news found for ${query}.`);
             }
         })
         .catch(error => {
             console.error('Error fetching news:', error);
-            showError(newsWidget, "Could not load news.");
+            // FALLBACK: Show fake news data if not look like shitzxc
+            console.log("Loading backup news data...");
+            const backupNews = [
+                {
+                    title: `Breaking News: ${query} Tech Scene Booms`,
+                    url: "#",
+                    source: { name: "Global Lens Daily" },
+                    image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                },
+                {
+                    title: `Weather Update: Sunny skies expected in ${query}`,
+                    url: "#",
+                    source: { name: "Weather Channel" },
+                    image: "https://images.unsplash.com/photo-1561484930-998b6a7b22e8?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                },
+                {
+                    title: `Local tourism hits record highs in ${query}`,
+                    url: "#",
+                    source: { name: "Travel Weekly" },
+                    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                }
+            ];
+            
+            newsWidget.innerHTML = ""; // Clear spinner
+            renderArticles(backupNews); // Render the backup data
+            
+            // Note that this is offline mode / because this API is a petty bijch
+            newsWidget.innerHTML += `<p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 10px;">(API Limit Reached: Showing Demo Data)</p>`;
         });
+}
+
+// Helper function to render the HTML (reused for real and backup data)
+function renderArticles(articles) {
+    articles.forEach(article => {
+        const image = article.image || 'https://via.placeholder.com/150?text=News';
+        const date = new Date(article.publishedAt).toLocaleDateString();
+        
+        const articleHTML = `
+            <div class="news-article">
+                <div class="news-image" style="background-image: url('${image}')"></div>
+                <div class="news-text">
+                    <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+                    <p>${article.source.name} • ${date}</p>
+                </div>
+            </div>
+        `;
+        newsWidget.innerHTML += articleHTML;
+    });
 }
 
 // --- Forecast Logic ---
