@@ -49,7 +49,7 @@ This project utilizes a "Mashup" architecture, combining three distinct third-pa
 * **[JavaScript (ES6)](https://developer.mozilla.org/en-US/docs/Web/JavaScript):** Used for DOM manipulation, API fetch logic, and event handling.
 * **[OpenWeatherMap API](https://openweathermap.org/api):** Used for current weather data, 5-day forecasts, and autocomplete geocoding.
 * **[Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/):** Used to render the interactive 3D-enabled map.
-* **[GNews API](https://gnews.io/):** Used to fetch news articles based on search queries.
+* **[GNews API](https://gnews.io/):** Used to fetch news articles based on search queries. // Max 100 req per day :( sadge
 * **[Git & GitHub](https://github.com/):** Used for version control and hosting the repository.
 
 ---
@@ -65,6 +65,10 @@ Testing was conducted manually via scenario-based testing to ensure all User Sto
     * *Result:* Autocomplete dropdown appeared with "London, GB".
     * *Action:* Clicked "London, GB".
     * *Result:* Dashboard updated with UK news, London weather, and map flew to London.
+    1.1  **Not as expected** 
+           * *Action:* Typed "Lond" into the search bar. // Autocomplete will recommend but not exactly what you want*.
+           
+    
 
 2.  **Geolocation**
     * *Action:* Clicked the 📍 button.
