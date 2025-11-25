@@ -65,7 +65,7 @@ Testing was conducted manually via scenario-based testing to ensure all User Sto
     * *Result:* Autocomplete dropdown appeared with "London, GB".
     * *Action:* Clicked "London, GB".
     * *Result:* Dashboard updated with UK news, London weather, and map flew to London.
-    1.1  **Not as expected** 
+    <br>1.1  **Not as expected** 
            * *Action:* Typed "Lond" into the search bar. // Autocomplete will recommend but not exactly what you want*.
            
     
