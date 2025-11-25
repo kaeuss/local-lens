@@ -212,7 +212,7 @@ function updateForecast(lat, lon) {
                 const dayHTML = `
                     <div class="forecast-day">
                         <p>${dayName}</p>
-                        <img src="http://openweathermap.org/img/wn/${icon}.png" alt="${day.weather[0].description}">
+                        <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${day.weather[0].description}">
                         <p class="temp">${temp.toFixed(0)}°C</p>
                     </div>
                 `;
