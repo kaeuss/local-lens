@@ -279,6 +279,7 @@ input:checked + .slider:before { transform: translateX(26px); }
    ========================================= */
 #news-content {
     flex-grow: 1;
+    /* Limit height so it doesn't stretch other widgets too much */
     max-height: 450px; 
     height: 100%;
     min-height: 0;
@@ -307,14 +308,14 @@ input:checked + .slider:before { transform: translateX(26px); }
 .news-article {
     display: flex;
     gap: 15px;
-    padding: 12px 0; 
+    padding: 12px 0; /* Reduced padding */
     border-bottom: 1px solid #eee;
     align-items: start;
 }
 .news-article:last-child { border-bottom: none; }
 
 .news-image {
-    width: 70px; height: 50px;
+    width: 70px; height: 50px; /* Smaller images */
     background-size: cover; background-position: center;
     border-radius: 4px; flex-shrink: 0;
     background-color: #ccc;
@@ -407,27 +408,29 @@ body.dark-mode #hourly-content:hover::-webkit-scrollbar-thumb,
 body.dark-mode #forecast-content:hover::-webkit-scrollbar-thumb { background-color: #888; }
 
 /* =========================================
-   9. MOBILE RESPONSIVENESS
+   9. MOBILE RESPONSIVENESS (Refined)
    ========================================= */
-@media (max-width: 600px) {
+@media (max-width: 480px) { /* Matched your requested breakpoint */
     body {
-        margin: 1rem; /* Less margin on mobile */
+        margin: 1rem;
     }
     
-    /* 1. CONTROL BAR FIX: Stack items */
+    /* Control Bar Stacking */
     .control-bar {
-        flex-wrap: wrap; /* Allow wrapping */
+        flex-wrap: wrap; 
         border-radius: 20px; 
         padding: 15px;
         gap: 10px;
+        justify-content: center;
+        margin-bottom: 2rem; /* Add space below the control bar itself */
     }
     
-    /* Input takes full width of the first row */
     .search-wrapper {
         width: 100%;
         margin-bottom: 5px;
-        border-bottom: 1px solid #eee; /* Visual separator */
+        border-bottom: 1px solid #eee;
         padding-bottom: 10px;
+        flex: 0 0 100%;
     }
     
     body.dark-mode .search-wrapper {
@@ -436,37 +439,38 @@ body.dark-mode #forecast-content:hover::-webkit-scrollbar-thumb { background-col
 
     .divider { display: none; }
 
-    /* Buttons sit on the second row */
-    #geo-button, #switch-wrapper {
-        flex: 0 0 auto;
-    }
+    #geo-button { flex: 0 0 50px; }
+    #switch-wrapper { flex: 0 0 auto; }
+    #search-button { flex-grow: 1; }
     
-    /* Search button expands to fill remaining space */
-    #search-button {
-        flex-grow: 1; 
-    }
-    
-    /* 2. GRID FIX: Force Single Column */
+    /* DASHBOARD GRID - Force gaps and single column */
     .dashboard-grid { 
-        grid-template-columns: 1fr; /* One column only */
-        gap: 2rem; /* Big gap between widgets so they don't touch */
-        align-items: start; 
+        display: flex;
+        flex-direction: column;
+        gap: 2rem; /* Ensure 32px gap between widgets */
     }
 
-    /* 3. WIDGET HEIGHT FIX */
+    /* WIDGET STYLING - Allow natural height, prevent overlap */
     .widget { 
-        height: auto !important; /* Force natural height */
+        height: auto !important; 
         min-height: 0; 
         overflow: visible; 
+        margin-bottom: 1rem; /* Extra safety margin to prevent sticking */
+        flex: 0 0 auto; 
     }
 
-    /* 4. MAP FIX */
+    /* LIMIT NEWS HEIGHT ON MOBILE */
+    #news-content {
+        max-height: 300px; /* Shorter scroll area for mobile */
+    }
+
+    /* MAP HEIGHT */
     #map { 
-        height: 250px; /* Shorter map for mobile */
+        height: 250px; 
         min-height: 250px; 
     }
     
-    /* 5. FORECAST PADDING FIX (Prevent Scrollbar overlap) */
+    /* Forecast Padding */
     #hourly-content, #forecast-content {
         padding-bottom: 20px; 
     }
