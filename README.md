@@ -88,7 +88,8 @@ Testing was conducted manually via scenario-based testing to ensure all User Sto
 
 ### **Bugs & Issues**
 * **API Limits:** The GNews API (Free Tier) is limited to 100 requests per day. During heavy testing, a `403 Forbidden` error may occur. This was handled by adding a specific error message in the UI ("Could not load news") rather than leaving the widget blank.
-
+* **API Limits:** The GNews often blocks hosted sites (like GitHub Pages) due to CORS/security restrictions, though it works on localhost.
+* *The Fix:* I implemented a "Demo Data" fallback. If the live site detects this block, it automatically loads sample news articles so the dashboard UI remains fully functional
 ---
 
 ## 📦 Deployment
