@@ -251,9 +251,11 @@ function renderArticles(articles) {
     });
 }
 
-// --- Forecast Logic ---
+// --- Forecast Logic (v6 - Hourly + Daily) ---
 function updateForecast(lat, lon) {
     showLoading(forecastWidget);
+    // Note: We also clear the hourly widget
+    document.getElementById('hourly-content').innerHTML = '<div class="spinner"></div>';
 
     const forecastApiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
@@ -263,9 +265,39 @@ function updateForecast(lat, lon) {
             return response.json();
         })
         .then(data => {
-            forecastWidget.innerHTML = "";
+            // 1. Get Elements
+            const hourlyContainer = document.getElementById('hourly-content');
+            const dailyContainer = document.getElementById('forecast-content');
             
+            // 2. Clear Spinners
+            hourlyContainer.innerHTML = "";
+            dailyContainer.innerHTML = "";
+
+            // --- PART A: HOURLY FORECAST (Next 24 Hours) ---
+            // Take the first 8 items from the list (8 * 3 hours = 24 hours)
+            const hourlyData = data.list.slice(0, 8);
+            
+            hourlyData.forEach(item => {
+                const date = new Date(item.dt * 1000);
+                // Format time like "3 PM", "6 PM"
+                const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+                const icon = item.weather[0].icon;
+                const temp = item.main.temp;
+
+                const hourlyHTML = `
+                    <div class="hourly-item">
+                        <span>${timeStr}</span>
+                        <img src="https://openweathermap.org/img/wn/${icon}.png" alt="icon">
+                        <strong>${temp.toFixed(0)}°C</strong>
+                    </div>
+                `;
+                hourlyContainer.innerHTML += hourlyHTML;
+            });
+
+            // --- PART B: DAILY FORECAST (Next 5 Days) ---
+            // Filter to get roughly one item per day (skip every 8 items)
             const dailyData = [];
+            // Start from index 7 (approx 24h from now) to get the "next day" feel
             for (let i = 7; i < data.list.length; i += 8) {
                 dailyData.push(data.list[i]);
             }
@@ -283,7 +315,7 @@ function updateForecast(lat, lon) {
                         <p class="temp">${temp.toFixed(0)}°C</p>
                     </div>
                 `;
-                forecastWidget.innerHTML += dayHTML;
+                dailyContainer.innerHTML += dayHTML;
             });
         })
         .catch(error => {

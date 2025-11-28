@@ -471,3 +471,63 @@ body.dark-mode .news-article {
 body.dark-mode .news-text p {
     color: #aaa;
 }
+
+/* --- Hourly Forecast Styles --- */
+#hourly-content {
+    display: flex;
+    overflow-x: auto; /* Allows scrolling sideways */
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Hide scrollbar for cleaner look (Chrome/Safari) */
+#hourly-content::-webkit-scrollbar {
+    height: 4px;
+}
+#hourly-content::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.hourly-item {
+    min-width: 60px;
+    text-align: center;
+    background: #f8f9fa;
+    padding: 10px 5px;
+    border-radius: 8px;
+    flex-shrink: 0; /* Don't squash them */
+}
+
+.hourly-item span {
+    display: block;
+    font-size: 0.8rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.hourly-item img {
+    width: 35px;
+    height: 35px;
+}
+
+.hourly-item strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+/* Dark Mode Support */
+body.dark-mode .hourly-item {
+    background: #333;
+}
+body.dark-mode .hourly-item span {
+    color: #aaa;
+}
+body.dark-mode .hourly-item strong {
+    color: #fff;
+}
+body.dark-mode h4 {
+    color: #bbb !important;
+}
