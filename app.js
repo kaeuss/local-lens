@@ -23,6 +23,13 @@ const map = new mapboxgl.Map({
 });
 map.addControl(new mapboxgl.NavigationControl());
 
+// Fix for Mapbox grey area: Watch the container for size changes
+const mapObserver = new ResizeObserver(() => {
+    map.resize();
+});
+mapObserver.observe(document.getElementById(mapContainer));
+// ----------------------------
+
 // --- Initial Page Load ---
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Load Dashboard for default location
