@@ -381,6 +381,7 @@ body.dark-mode #suggestions-list li { border-bottom: 1px solid #555; color: whit
 body.dark-mode #suggestions-list li:hover { background-color: #555; }
 
 body.dark-mode h4 { color: #bbb !important; }
+body.dark-mode #weather-content .weather-info p { color: #e0e0e0; }
 body.dark-mode .hourly-item span, body.dark-mode .forecast-day p { color: #aaa; }
 body.dark-mode .hourly-item strong, body.dark-mode .forecast-day .temp { color: #fff; }
 body.dark-mode .hourly-item:hover, body.dark-mode .forecast-day:hover { background-color: rgba(255, 255, 255, 0.1); }
