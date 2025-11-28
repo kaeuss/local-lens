@@ -1,9 +1,12 @@
-/* Basic reset and font */
+/* =========================================
+   1. GLOBAL RESET & BODY
+   ========================================= */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 2rem;
     background-color: #e8ecec;
     color: #333;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 header {
@@ -11,11 +14,132 @@ header {
     margin-bottom: 2rem;
 }
 
-/* A simple CSS Grid for the dashboard */
+/* =========================================
+   2. NEW CONTROL BAR (Search + Toggle)
+   ========================================= */
+.control-bar {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 50px; /* Full pill shape */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Float shadow */
+    margin: 20px auto;
+    max-width: 700px;
+    width: 90%;
+    gap: 10px;
+    position: relative;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.search-wrapper {
+    flex-grow: 1;
+    position: relative;
+}
+
+.control-bar input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 1.1rem;
+    padding: 5px;
+    background: transparent;
+    color: #333;
+}
+
+/* Circle Buttons (Pin) */
+.control-bar button {
+    background: #f1f3f4;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    padding: 0;
+    color: #5f6368;
+}
+
+.control-bar button:hover {
+    background-color: #e8eaed;
+}
+
+/* Search Submit Button */
+#search-button {
+    border-radius: 20px;
+    width: auto;
+    padding: 0 20px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+#search-button:hover {
+    background-color: #0056b3;
+}
+
+.divider {
+    width: 1px;
+    height: 25px;
+    background-color: #ccc;
+    margin: 0 5px;
+}
+
+/* =========================================
+   3. TOGGLE SWITCH
+   ========================================= */
+#switch-wrapper {
+    position: static !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+}
+
+.switch {
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px; width: 26px;
+    left: 4px; bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #007bff; }
+input:checked + .slider:before { transform: translateX(26px); }
+
+/* =========================================
+   4. DASHBOARD GRID & WIDGETS
+   ========================================= */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
+    align-items: stretch;
 }
 
 .widget {
@@ -23,6 +147,10 @@ header {
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s;
 }
 
 .widget h2 {
@@ -31,107 +159,40 @@ header {
     padding-bottom: 0.5rem;
 }
 
-/* This is for the Mapbox map */
+/* Map Widget */
 #map {
+    flex-grow: 1;
     width: 100%;
-    height: 300px; /* You can change this */
+    min-height: 300px;
     border-radius: 8px;
-    background-color: #e0e0e0; /* Placeholder color */
+    background-color: #e0e0e0;
 }
 
-/* --- Weather Widget Styles --- */
+/* =========================================
+   5. WEATHER WIDGET
+   ========================================= */
 #weather-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-#weather-content .weather-info h3 {
-    font-size: 2.5rem; /* Makes the temperature big */
-    margin: 0;
-}
+#weather-content .weather-info h3 { font-size: 2.5rem; margin: 0; }
+#weather-content .weather-info p { margin: 0; text-transform: capitalize; }
+#weather-content img { width: 100px; height: 100px; }
 
-#weather-content .weather-info p {
-    margin: 0;
-    text-transform: capitalize; /* e.g., "scattered clouds" -> "Scattered Clouds" */
-}
-
-#weather-content img {
-    width: 100px;
-    height: 100px;
-}
-
-/* --- Search Widget Styles --- */
-.search-container {
+/* Forecast Containers */
+#hourly-content {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.search-container input {
-    flex-grow: 1; /* Makes the input field fill the space */
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.search-container button {
-    padding: 8px 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.search-container button:hover {
-    background-color: #0056b3;
-}
-
-#search-location h3 {
-    margin: 0;
-    color: #333;
-}
-
-/* --- News Widget Styles --- */
-#news-content {
-    max-height: 400px; /* Give it a max height */
-    overflow-y: auto;  /* Make it scrollable */
-    padding-right: 10px; /* Add padding for the scrollbar */
-}
-
-.news-article {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
     border-bottom: 1px solid #eee;
 }
+#hourly-content::-webkit-scrollbar { height: 4px; }
+#hourly-content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-.news-article:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.news-article h3 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.1rem;
-}
-
-.news-article h3 a {
-    text-decoration: none;
-    color: #007bff;
-}
-
-.news-article h3 a:hover {
-    text-decoration: underline;
-}
-
-.news-article p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #555;
-}
-
-/* --- Forecast Widget Styles --- */
 #forecast-content {
     display: flex;
     justify-content: space-between;
@@ -139,301 +200,49 @@ header {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid #eee;
-    overflow-x: auto; /* Allows horizontal scrolling on small screens */
+    overflow-x: auto;
 }
 
-.forecast-day {
-    flex: 1; /* Make each day take equal space */
-    min-width: 80px; /* Ensure they don't get too small */
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-}
-
-.forecast-day p {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #333;
-}
-
-.forecast-day img {
-    width: 50px;
-    height: 50px;
-}
-
-.forecast-day .temp {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #333;
-}
-
-/* --- Dark Mode Styles --- */
-
-
-/* This is what changes when dark mode is ON */
-
-body.dark-mode {
-    background-color: #1a1a1a;
-    color: #f1f1f1;
-}
-
-body.dark-mode .widget {
-    background-color: #2c2c2c;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-body.dark-mode h1,
-body.dark-mode h2 {
-    color: #ffffff;
-    border-bottom-color: #444;
-}
-
-body.dark-mode .forecast-day {
-    background-color: #333;
-}
-
-body.dark-mode .forecast-day p,
-body.dark-mode .forecast-day .temp {
-    color: #f1f1f1;
-}
-
-body.dark-mode .news-article h3 a {
-    color: #58a6ff;
-}
-
-body.dark-mode .search-container input {
-    background-color: #333;
-    border-color: #555;
-    color: #f1f1f1;
-}
-
-/* CLEANED UP SWITCH CLASS */
-.switch {
-    /* REMOVED position, top, right from here */
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-    position: relative; /* Add this just to be safe */
-}
-
-/* Hide the default HTML checkbox */
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-/* The "track" of the slider */
-.slider {
-    position: absolute;
+/* Google-Style Pill Items */
+.hourly-item, .forecast-day {
     cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-    border-radius: 34px;
-}
-
-/* The "ball" of the slider */
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-/* --- Toggle "On" State --- */
-input:checked + .slider {
-    background-color: #007bff; /* Blue when on */
-}
-
-input:checked + .slider:before {
-    transform: translateX(26px); /* This moves the ball to the right */
-}
-
-/* --- Dark Mode Style for the switch --- */
-body.dark-mode .slider {
-    background-color: #555; /* Darker track when off */
-}
-
-/* --- Geolocation Button --- */
-#geo-button {
-    padding: 8px 12px;
-    background-color: #6c757d; /* Grey color to distinguish from Search */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.2rem; /* Make the emoji a bit bigger */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#geo-button:hover {
-    background-color: #5a6268;
-}
-
-/* --- Fixes for Dark Mode Search Widget --- */
-
-/* 1. Fix the "Displaying: Location" text */
-body.dark-mode #search-location,
-body.dark-mode #search-location h3 {
-    color: #ffffff; /* Pure white text */
-}
-
-/* 2. Fix the Input Box text and background */
-body.dark-mode .search-container input {
-    color: #ffffff;       /* White typing text */
-    background-color: #444; /* Dark grey background for the box */
-    border-color: #666;     /* Lighter grey border */
-}
-
-/* 3. Fix the Placeholder text (the grey hint text) */
-body.dark-mode .search-container input::placeholder {
-    color: #cccccc; /* Light grey placeholder so it's readable */
-}
-
-/* --- Loading Spinner & Error Styles --- */
-
-.spinner {
-    border: 4px solid #f3f3f3; /* Light grey background */
-    border-top: 4px solid #007bff; /* Blue spinner color */
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin: 20px auto; /* Center it */
-    display: block;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.error-message {
-    color: #dc3545; /* Red text */
     text-align: center;
+    padding: 10px 5px;
+    min-width: 60px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    background: transparent;
+    margin: 0 2px;
+}
+
+.hourly-item span, .forecast-day p { display: block; font-size: 0.8rem; color: #555; margin-bottom: 5px; }
+.hourly-item img, .forecast-day img { width: 35px; height: 35px; }
+.hourly-item strong, .forecast-day .temp { display: block; font-size: 0.9rem; color: #333; }
+
+.hourly-item:hover, .forecast-day:hover { background-color: rgba(0, 0, 0, 0.05); }
+
+/* Selected State */
+.selected-weather {
+    background-color: #e8f0fe !important;
+    color: #1967d2 !important;
     font-weight: bold;
-    padding: 1rem;
+}
+.selected-weather span, .selected-weather p, 
+.selected-weather strong, .selected-weather .temp { color: #1967d2 !important; }
+
+/* =========================================
+   6. NEWS WIDGET
+   ========================================= */
+#news-content {
+    flex-grow: 1;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 5px;
 }
 
-/* Dark mode adjustment for error text */
-body.dark-mode .error-message {
-    color: #ff6b6b;
-}
-
-/* --- Wrapper Layout Logic --- */
-
-/* DESKTOP: The wrapper floats in the top right */
-#switch-wrapper {
-    position: absolute;
-    top: 2rem;
-    right: 2rem;
-}
-
-/* MOBILE: The wrapper centers itself */
-@media (max-width: 600px) {
-    
-    /* Reset the header to just be a normal column */
-    header {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-top: 1rem;
-    }
-
-    /* Move the wrapper to the center position */
-    #switch-wrapper {
-        position: static; /* Stop floating */
-        width: 100%;      /* Take full width */
-        display: flex;    /* Use flexbox to center the child */
-        justify-content: center; /* Center the switch horizontally */
-        margin-top: 10px;
-        margin-bottom: 20px;
-    }
-    
-    /* Ensure the switch stays small */
-    .switch {
-        flex-shrink: 0; /* Do not let it squish */
-    }
-
-    /* Keep the Search Button fixes */
-    .search-container {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .search-container input { width: 100%; margin-bottom: 0; }
-    #geo-button { flex: 1; justify-content: center; height: 40px; }
-    #search-button { flex: 3; height: 40px; }
-}
-
-/* --- Search Suggestions Dropdown --- */
-
-/* Make the container capable of holding the floating list */
-.search-container {
-    position: relative; /* This allows the list to position itself relative to this box */
-}
-
-#suggestions-list {
-    position: absolute;
-    top: 100%; /* Push it right below the input */
-    left: 0;
-    background-color: white;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    width: 100%; /* Match width of the container */
-    max-width: 300px; /* Don't let it get too wide on desktop */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    border-radius: 0 0 4px 4px;
-    z-index: 1000; /* Ensure it sits on top of everything */
-    max-height: 200px;
-    overflow-y: auto; /* Scroll if too many results */
-    display: none; /* Hidden by default */
-}
-
-#suggestions-list li {
-    padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    color: #333;
-    text-align: left;
-}
-
-#suggestions-list li:hover {
-    background-color: #f0f0f0;
-}
-
-/* Dark mode support */
-body.dark-mode #suggestions-list {
-    background-color: #444;
-    color: white;
-}
-
-body.dark-mode #suggestions-list li {
-    border-bottom: 1px solid #555;
-    color: white;
-}
-
-body.dark-mode #suggestions-list li:hover {
-    background-color: #555;
-}
-
-/* --- Enhanced Global News Styles --- */
 .news-article {
     display: flex;
     gap: 15px;
@@ -441,154 +250,102 @@ body.dark-mode #suggestions-list li:hover {
     border-bottom: 1px solid #eee;
     align-items: start;
 }
+.news-article:last-child { border-bottom: none; }
 
 .news-image {
-    width: 80px;
-    height: 60px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 4px;
-    flex-shrink: 0; /* Don't squish the image */
+    width: 80px; height: 60px;
+    background-size: cover; background-position: center;
+    border-radius: 4px; flex-shrink: 0;
     background-color: #ccc;
 }
 
-.news-text h3 {
-    margin: 0 0 5px 0;
-    font-size: 1rem;
-    line-height: 1.3;
-}
+.news-text h3 { margin: 0 0 5px 0; font-size: 1rem; line-height: 1.3; }
+.news-text h3 a { text-decoration: none; color: #007bff; }
+.news-text h3 a:hover { text-decoration: underline; }
+.news-text p { font-size: 0.8rem; color: #666; margin: 0; }
 
-.news-text p {
-    font-size: 0.8rem;
-    color: #666;
-    margin: 0;
+/* =========================================
+   7. AUTOCOMPLETE & UI EXTRAS
+   ========================================= */
+#suggestions-list {
+    position: absolute;
+    top: 45px;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    list-style: none;
+    margin: 0; padding: 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
 }
+#suggestions-list li { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; color: #333; text-align: left; }
+#suggestions-list li:hover { background-color: #f0f0f0; }
 
-/* Dark Mode Adjustments */
-body.dark-mode .news-article {
-    border-bottom-color: #444;
-}
-body.dark-mode .news-text p {
-    color: #aaa;
-}
-
-/* --- Hourly Forecast Container --- */
-#hourly-content {
-    display: flex;
-    overflow-x: auto; /* Allows scrolling sideways */
-    gap: 10px;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-/* Hide scrollbar for cleaner look (Chrome/Safari) */
-#hourly-content::-webkit-scrollbar {
-    height: 4px;
-}
-#hourly-content::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 4px;
-}
-
-/* --- NEW CLEAN WEATHER ITEMS --- */
-/* This handles both the Hourly items and the Daily items */
-.hourly-item, .forecast-day {
+/* Animated Logo */
+#cursor-logo {
+    display: inline-block;
     cursor: pointer;
-    text-align: center;
-    padding: 10px 5px;
-    min-width: 60px; /* Ensures they are wide enough */
-    flex-shrink: 0;  /* Don't let them squish */
-    
-    border-radius: 16px; /* Smooth pill shape */
-    border: 1px solid transparent; /* Invisible border prevents jumping */
-    transition: all 0.2s ease;
-    background: transparent; /* Clean look by default (no grey box) */
+    transition: transform 0.1s ease-out;
+    animation: slowBlink 4s infinite ease-in-out;
 }
+@keyframes slowBlink { 0%, 40%, 60%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+#cursor-logo:hover { animation: none; opacity: 1; font-size: 1.2em; }
 
-/* Internal text styling */
-.hourly-item span, .forecast-day p {
-    display: block;
-    font-size: 0.8rem;
-    color: #555;
-    margin-bottom: 5px;
+/* Spinner & Error */
+.spinner {
+    border: 4px solid #f3f3f3; border-top: 4px solid #007bff;
+    border-radius: 50%; width: 40px; height: 40px;
+    animation: spin 1s linear infinite; margin: 20px auto;
 }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.error-message { color: #dc3545; text-align: center; font-weight: bold; padding: 1rem; }
 
-.hourly-item img, .forecast-day img {
-    width: 35px;
-    height: 35px;
-}
+/* =========================================
+   8. DARK MODE
+   ========================================= */
+body.dark-mode { background-color: #1a1a1a; color: #f1f1f1; }
+body.dark-mode .widget { background-color: #2c2c2c; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); }
+body.dark-mode h1, body.dark-mode h2 { color: #ffffff; border-bottom-color: #444; }
 
-.hourly-item strong, .forecast-day .temp {
-    display: block;
-    font-size: 0.9rem;
-    color: #333;
-}
+/* Control Bar Dark */
+body.dark-mode .control-bar { background-color: #2c2c2c; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+body.dark-mode .control-bar input { color: white; }
+body.dark-mode .control-bar button { background-color: #444; color: #ddd; }
+body.dark-mode .divider { background-color: #555; }
 
-/* Hover Effect: Subtle grey pill, No more popping out */
-.hourly-item:hover, .forecast-day:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    transform: none !important; /* Stop it from growing */
-}
+/* Autocomplete Dark */
+body.dark-mode #suggestions-list { background-color: #444; color: white; }
+body.dark-mode #suggestions-list li { border-bottom: 1px solid #555; color: white; }
+body.dark-mode #suggestions-list li:hover { background-color: #555; }
 
-/* --- ACTIVE CLICK EFFECT (The Google Pill) --- */
-.selected-weather {
-    background-color: #e8f0fe !important; /* Google's light blue */
-    color: #1967d2 !important; /* Google's blue text */
-    font-weight: bold;
-    transform: none !important; /* Stop it from growing */
-    box-shadow: none !important; /* Remove shadow */
-    border: 1px solid transparent !important; /* Remove border */
-}
+/* Weather Dark */
+body.dark-mode h4 { color: #bbb !important; }
+body.dark-mode .hourly-item span, body.dark-mode .forecast-day p { color: #aaa; }
+body.dark-mode .hourly-item strong, body.dark-mode .forecast-day .temp { color: #fff; }
+body.dark-mode .hourly-item:hover, body.dark-mode .forecast-day:hover { background-color: rgba(255, 255, 255, 0.1); }
+body.dark-mode .selected-weather { background-color: #424242 !important; color: #8ab4f8 !important; }
+body.dark-mode .selected-weather span, body.dark-mode .selected-weather p,
+body.dark-mode .selected-weather strong, body.dark-mode .selected-weather .temp { color: #8ab4f8 !important; }
 
-/* Ensure text inside selected items turns blue too */
-.selected-weather span, 
-.selected-weather p, 
-.selected-weather strong,
-.selected-weather .temp {
-    color: #1967d2 !important;
-}
+/* News & Misc Dark */
+body.dark-mode .news-article { border-bottom-color: #444; }
+body.dark-mode .news-text p { color: #aaa; }
+body.dark-mode .news-article h3 a { color: #58a6ff; }
+body.dark-mode .slider { background-color: #555; }
+body.dark-mode .error-message { color: #ff6b6b; }
 
-/* --- DARK MODE ADJUSTMENTS --- */
-body.dark-mode h4 {
-    color: #bbb !important;
-}
-
-body.dark-mode .hourly-item span,
-body.dark-mode .forecast-day p {
-    color: #aaa;
-}
-
-body.dark-mode .hourly-item strong,
-body.dark-mode .forecast-day .temp {
-    color: #fff;
-}
-
-/* Dark Mode Hover */
-body.dark-mode .hourly-item:hover, 
-body.dark-mode .forecast-day:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Dark Mode Selected Pill */
-body.dark-mode .selected-weather {
-    background-color: #424242 !important; /* Dark grey pill */
-    color: #8ab4f8 !important; /* Light blue text */
-}
-
-body.dark-mode .selected-weather span, 
-body.dark-mode .selected-weather p, 
-body.dark-mode .selected-weather strong,
-body.dark-mode .selected-weather .temp {
-    color: #8ab4f8 !important;
-}
-
-/* --- NEWS WIDGET FIX --- */
-/* This forces the news box to fill the height but scroll internally */
-#news-content {
-    flex-grow: 1;       /* Fill remaining vertical space */
-    height: 100%;       /* Force full height */
-    min-height: 0;      /* Critical fix for Flexbox scrolling */
-    overflow-y: auto;   /* Scroll if content is too long */
-    padding-right: 5px; /* Space for scrollbar */
+/* =========================================
+   9. MOBILE RESPONSIVENESS
+   ========================================= */
+@media (max-width: 600px) {
+    .control-bar { flex-wrap: wrap; border-radius: 20px; padding: 15px; }
+    .search-wrapper { width: 100%; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    body.dark-mode .search-wrapper { border-bottom-color: #444; }
+    .divider { display: none; }
+    #geo-button, #switch-wrapper { flex: 0 0 auto; }
+    #search-button { flex-grow: 1; }
 }

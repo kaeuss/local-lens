@@ -20,33 +20,34 @@
         <h1>Lens Dashboard</h1>
         <p>Your Personal KPO API</p>
         <p id="current-date"></p>
-            <label class="switch" for="theme-toggle-input" title="Toggle dark/light mode">
-            <input type="checkbox" id="theme-toggle-input">
-            <span class="slider"></span>
-            </label>
+
+        <div class="control-bar">
+            <div class="search-wrapper">
+                <input type="text" id="search-input" placeholder="Search city..." autocomplete="off">
+                <ul id="suggestions-list"></ul> </div>
+            
+            <button id="geo-button" title="Use my current location">📍</button>
+            <button id="search-button">Search</button>
+            
+            <div class="divider"></div>
+
+            <div id="switch-wrapper">
+                <label class="switch" for="theme-toggle-input" title="Toggle dark/light mode">
+                    <input type="checkbox" id="theme-toggle-input">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
     </header>
 
     <main class="dashboard-grid">
         
-        <section class="widget" id="search-widget">
-            <h2>Location Search</h2>
-            <div class="search-container">
-                <input type="text" id="search-input" placeholder="Enter any city (e.g. Tokyo, Paris)..." autocomplete="off">
-                <ul id="suggestions-list"></ul>
-                <button id="geo-button" title="Use my current location">📍</button>
-                <button id="search-button">Search</button>
-                </div>
-            <div id="search-location">
-                </div>
-        </section>
-
         <section class="widget" id="weather-widget">
             <h2>Current Weather</h2>
             <div id="weather-content">
                 </div>
             
             <h4 style="margin: 15px 0 5px; color: #888;">Hourly (Next 24h)</h4>
-            
             <div id="hourly-content"></div>
 
             <h4 style="margin: 15px 0 5px; color: #888;">Daily (Next 5 Days)</h4>

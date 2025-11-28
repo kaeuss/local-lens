@@ -2,7 +2,6 @@
 const searchInput = document.getElementById('search-input');
 const searchButton = document.getElementById('search-button');
 const geoButton = document.getElementById('geo-button');
-const locationDisplay = document.getElementById('search-location');
 const weatherWidget = document.getElementById('weather-content');
 const mapContainer = 'map';
 const newsWidget = document.getElementById('news-content');
@@ -11,7 +10,7 @@ const forecastWidget = document.getElementById('forecast-content');
 // Global variable to track the map marker
 let currentMarker = null;
 
-// NEW: Global variable to store the "Real-Time" weather so we can revert back to it
+// Global variable to store the "Real-Time" weather so we can revert back to it
 let savedCurrentWeather = null;
 
 // --- Initialize the Map ---
@@ -26,16 +25,16 @@ map.addControl(new mapboxgl.NavigationControl());
 
 // --- Initial Page Load ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Load Dashboard
+    // 1. Load Dashboard for default location
     updateDashboard("Singapore");
 
-    // 2. Set the Date
+    // 2. Set the Date in the header
     const dateDisplay = document.getElementById('current-date');
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     dateDisplay.textContent = now.toLocaleDateString('en-US', options);
 
-    // 3. Check for saved theme
+    // 3. Check for saved Dark Mode preference
     const savedTheme = localStorage.getItem('theme');
     const themeToggleInput = document.getElementById('theme-toggle-input'); 
     
@@ -45,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- Set up the search button click listener ---
+// --- Search Button Listener ---
 searchButton.addEventListener('click', () => {
     const query = searchInput.value;
     if (query) {
@@ -53,13 +52,13 @@ searchButton.addEventListener('click', () => {
     }
 });
 
-// --- Set up the "Enter" key listener for the input box ---
+// --- Enter Key Listener ---
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         const query = searchInput.value;
         if (query) {
             updateDashboard(query);
-            // Also hide the autocomplete suggestions if they are open
+            // Hide autocomplete list if open
             if (suggestionsList) {
                 suggestionsList.style.display = 'none';
             }
@@ -67,7 +66,7 @@ searchInput.addEventListener('keypress', (e) => {
     }
 });
 
-// --- Main Function to Update Everything ---
+// --- Main Function to Update Everything (By Name) ---
 function updateDashboard(query) {
     showLoading(weatherWidget);
     
@@ -79,28 +78,52 @@ function updateDashboard(query) {
             return response.json();
         })
         .then(data => {
-            // NEW: Save the current weather data globally
+            // Save data for "revert" functionality
             savedCurrentWeather = data;
 
             const lat = data.coord.lat;
             const lon = data.coord.lon;
 
+            // Trigger all updates
             updateWeather(data); 
             updateMap(lon, lat, data.name, data.main.temp, data.weather[0].description);
-            updateLocation(data.name, data.sys.country);
+            // updateLocation removed as per new design
             updateNews(data.name); 
             updateForecast(lat, lon);
         })
         .catch(error => {
             console.error('Error fetching data:', error);
             showError(weatherWidget, "Location not found. Please try again.");
-            locationDisplay.innerHTML = ""; 
+        });
+}
+
+// --- Main Function to Update Everything (By Coordinates) ---
+function updateDashboardByCoords(lat, lon) {
+    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
+
+    fetch(weatherApiUrl)
+        .then(response => {
+            if (!response.ok) throw new Error('Location not found');
+            return response.json();
+        })
+        .then(data => {
+            savedCurrentWeather = data;
+            
+            updateWeather(data);
+            updateMap(lon, lat, data.name, data.main.temp, data.weather[0].description);
+            // We use the city name found by coordinates to search for news
+            updateNews(data.name); 
+            updateForecast(lat, lon);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            alert("Could not load weather for your location.");
         });
 }
 
 // --- Helper Functions ---
 
-// 1. Helper to render the main display
+// 1. Helper to render the main weather display
 function renderMainWeather(temp, description, icon, timeLabel = "") {
     const weatherHTML = `
         <div class="weather-info">
@@ -112,7 +135,7 @@ function renderMainWeather(temp, description, icon, timeLabel = "") {
     weatherWidget.innerHTML = weatherHTML;
 }
 
-// 2. Updated: Calls the helper
+// 2. Standard update uses the helper
 function updateWeather(data) {
     renderMainWeather(data.main.temp, data.weather[0].description, data.weather[0].icon);
 }
@@ -138,11 +161,7 @@ function updateMap(lon, lat, cityName, temp, description) {
         .addTo(map);
 }
 
-function updateLocation(name, country) {
-    locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
-}
-
-// --- Global News Logic ---
+// --- Global News Logic (WITH BACKUP DATA) ---
 function updateNews(query) {
     showLoading(newsWidget);
 
@@ -158,6 +177,7 @@ function updateNews(query) {
 
             if (data.articles && data.articles.length > 0) {
                 data.articles.forEach(article => {
+                    // Handle missing images
                     const image = article.image || 'https://via.placeholder.com/150?text=News';
                     
                     const articleHTML = `
@@ -179,7 +199,7 @@ function updateNews(query) {
             console.error('Error fetching news:', error);
             console.log("Loading backup news data...");
             
-            // FALLBACK DATA
+            // --- BACKUP DEMO DATA (Smart Links) ---
             const backupNews = [
                 {
                     title: `Breaking News: ${query} Tech Scene Booms`,
@@ -219,6 +239,7 @@ function updateNews(query) {
             ];
             
             newsWidget.innerHTML = ""; 
+            
             backupNews.forEach(article => {
                 const date = new Date(article.publishedAt).toLocaleDateString();
                 const articleHTML = `
@@ -232,11 +253,13 @@ function updateNews(query) {
                 `;
                 newsWidget.innerHTML += articleHTML;
             });
+            
+            // Disclaimer at bottom
             newsWidget.innerHTML += `<p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 15px; padding-bottom: 10px;">(API Limit Reached: Showing Demo Data)</p>`;
         });
 }
 
-// --- Forecast Logic (Toggle Select/Deselect) ---
+// --- Forecast Logic (With Toggle Click) ---
 function updateForecast(lat, lon) {
     showLoading(forecastWidget);
     document.getElementById('hourly-content').innerHTML = '<div class="spinner"></div>';
@@ -269,15 +292,12 @@ function updateForecast(lat, lon) {
                     <strong>${temp.toFixed(0)}°C</strong>
                 `;
 
-                // --- TOGGLE CLICK EVENT ---
+                // CLICK EVENT
                 el.addEventListener('click', () => {
-                    // Check if ALREADY selected
                     if (el.classList.contains('selected-weather')) {
-                        // DESELECT: Remove class and Revert to Original Data
                         el.classList.remove('selected-weather');
-                        updateWeather(savedCurrentWeather);
+                        updateWeather(savedCurrentWeather); // Revert to current
                     } else {
-                        // SELECT: Clear others, Select this, Show Forecast Data
                         document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
                             div.classList.remove('selected-weather');
                         });
@@ -310,11 +330,11 @@ function updateForecast(lat, lon) {
                     <p class="temp">${temp.toFixed(0)}°C</p>
                 `;
 
-                // --- TOGGLE CLICK EVENT ---
+                // CLICK EVENT
                 el.addEventListener('click', () => {
                     if (el.classList.contains('selected-weather')) {
                         el.classList.remove('selected-weather');
-                        updateWeather(savedCurrentWeather);
+                        updateWeather(savedCurrentWeather); // Revert to current
                     } else {
                         document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
                             div.classList.remove('selected-weather');
@@ -349,7 +369,6 @@ themeToggleInput.addEventListener('change', () => {
 });
 
 // --- Geolocation Logic ---
-
 geoButton.addEventListener('click', () => {
     if (!navigator.geolocation) {
         alert("Geolocation is not supported by your browser.");
@@ -369,32 +388,7 @@ geoButton.addEventListener('click', () => {
     );
 });
 
-function updateDashboardByCoords(lat, lon) {
-    const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
-
-    fetch(weatherApiUrl)
-        .then(response => {
-            if (!response.ok) throw new Error('Location not found');
-            return response.json();
-        })
-        .then(data => {
-            // NEW: Save the current weather data globally here too
-            savedCurrentWeather = data;
-            
-            updateWeather(data);
-            updateMap(lon, lat, data.name, data.main.temp, data.weather[0].description);
-            updateLocation(data.name, data.sys.country);
-            updateNews(data.name); 
-            updateForecast(lat, lon);
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-            alert("Could not load weather for your location.");
-        });
-}
-
 // --- UI Helper Functions ---
-
 function showLoading(element) {
     element.innerHTML = '<div class="spinner"></div>';
 }
@@ -404,7 +398,6 @@ function showError(element, message) {
 }
 
 // --- Autocomplete Logic ---
-
 const suggestionsList = document.getElementById('suggestions-list');
 
 searchInput.addEventListener('input', async () => {
@@ -434,8 +427,7 @@ searchInput.addEventListener('input', async () => {
                 li.addEventListener('click', () => {
                     searchInput.value = place.name; 
                     suggestionsList.style.display = 'none'; 
-                    // Note: We could assume this matches the 'search' button logic for now
-                    updateDashboard(place.name); 
+                    updateDashboardByCoords(place.lat, place.lon);
                 });
 
                 suggestionsList.appendChild(li);
@@ -453,3 +445,7 @@ document.addEventListener('click', (e) => {
         suggestionsList.style.display = 'none';
     }
 });
+
+// --- Animated Eye Logo Logic ---
+// Note: Cursor tracking was removed for simplicity as requested.
+// The CSS animation handles the blinking.
