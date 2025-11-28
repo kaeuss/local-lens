@@ -189,9 +189,13 @@ input:checked + .slider:before { transform: translateX(26px); }
     padding-bottom: 10px;
     margin-bottom: 10px;
     border-bottom: 1px solid #eee;
+    /* Scrollbar Styling */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+    transition: scrollbar-color 0.3s;
+    /* Changed to pointer as requested */
+    cursor: pointer; 
 }
-#hourly-content::-webkit-scrollbar { height: 4px; }
-#hourly-content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
 #forecast-content {
     display: flex;
@@ -201,11 +205,43 @@ input:checked + .slider:before { transform: translateX(26px); }
     padding-top: 1.5rem;
     border-top: 1px solid #eee;
     overflow-x: auto;
+    /* Scrollbar Styling */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+    transition: scrollbar-color 0.3s;
+    /* Changed to pointer as requested */
+    cursor: pointer;
+}
+
+/* Webkit Scrollbar Styling (Chrome/Safari/Edge) for BOTH containers */
+#hourly-content::-webkit-scrollbar,
+#forecast-content::-webkit-scrollbar {
+    height: 6px; 
+    background: transparent;
+    cursor: pointer; /* Explicitly set cursor on track */
+}
+
+#hourly-content::-webkit-scrollbar-thumb,
+#forecast-content::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 4px; 
+    cursor: pointer; /* Explicitly set cursor on thumb */
+}
+
+/* Scrollbar Hover for BOTH containers */
+#hourly-content:hover,
+#forecast-content:hover {
+    scrollbar-color: #888 transparent;
+}
+
+#hourly-content:hover::-webkit-scrollbar-thumb,
+#forecast-content:hover::-webkit-scrollbar-thumb {
+    background-color: #888;
 }
 
 /* Google-Style Pill Items */
 .hourly-item, .forecast-day {
-    cursor: pointer;
+    cursor: pointer !important; /* Force pointer cursor on items */
     text-align: center;
     padding: 10px 5px;
     min-width: 60px;
@@ -233,7 +269,7 @@ input:checked + .slider:before { transform: translateX(26px); }
 .selected-weather strong, .selected-weather .temp { color: #1967d2 !important; }
 
 /* =========================================
-   6. NEWS WIDGET
+   6. NEWS WIDGET & SCROLLBAR
    ========================================= */
 #news-content {
     flex-grow: 1;
@@ -241,8 +277,35 @@ input:checked + .slider:before { transform: translateX(26px); }
     min-height: 0;
     overflow-y: auto;
     padding-right: 5px;
+    /* Firefox Scrollbar Styling */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+    transition: scrollbar-color 0.3s;
 }
 
+/* Webkit Scrollbar (Chrome/Safari) */
+#news-content::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+}
+
+#news-content::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+/* --- SCROLLBAR HOVER EFFECT --- */
+#news-content:hover {
+    scrollbar-color: #888 transparent; /* Darker on hover (Firefox) */
+}
+
+#news-content:hover::-webkit-scrollbar-thumb {
+    background-color: #888; /* Darker on hover (Chrome/Safari) */
+}
+
+/* News Articles */
 .news-article {
     display: flex;
     gap: 15px;
@@ -338,14 +401,59 @@ body.dark-mode .news-article h3 a { color: #58a6ff; }
 body.dark-mode .slider { background-color: #555; }
 body.dark-mode .error-message { color: #ff6b6b; }
 
+/* Dark Mode Scrollbar Overrides (Applied to News, Hourly AND Forecast) */
+body.dark-mode #news-content,
+body.dark-mode #hourly-content,
+body.dark-mode #forecast-content {
+    scrollbar-color: #555 transparent; 
+}
+
+body.dark-mode #news-content:hover,
+body.dark-mode #hourly-content:hover,
+body.dark-mode #forecast-content:hover {
+    scrollbar-color: #888 transparent; 
+}
+
+body.dark-mode #news-content::-webkit-scrollbar-thumb,
+body.dark-mode #hourly-content::-webkit-scrollbar-thumb,
+body.dark-mode #forecast-content::-webkit-scrollbar-thumb {
+    background-color: #555; 
+}
+
+body.dark-mode #news-content:hover::-webkit-scrollbar-thumb,
+body.dark-mode #hourly-content:hover::-webkit-scrollbar-thumb,
+body.dark-mode #forecast-content:hover::-webkit-scrollbar-thumb {
+    background-color: #888; 
+}
+
 /* =========================================
    9. MOBILE RESPONSIVENESS
    ========================================= */
 @media (max-width: 600px) {
-    .control-bar { flex-wrap: wrap; border-radius: 20px; padding: 15px; }
-    .search-wrapper { width: 100%; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-    body.dark-mode .search-wrapper { border-bottom-color: #444; }
+    .control-bar {
+        flex-wrap: wrap; 
+        border-radius: 20px; 
+        padding: 15px;
+    }
+    
+    .search-wrapper {
+        width: 100%;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    
+    body.dark-mode .search-wrapper {
+        border-bottom-color: #444;
+    }
+
     .divider { display: none; }
-    #geo-button, #switch-wrapper { flex: 0 0 auto; }
-    #search-button { flex-grow: 1; }
+
+    #geo-button, #switch-wrapper {
+        flex: 0 0 auto;
+    }
+    
+    #search-button {
+        flex-grow: 1; 
+    }
 }
