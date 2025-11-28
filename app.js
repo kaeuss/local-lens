@@ -8,8 +8,11 @@ const mapContainer = 'map';
 const newsWidget = document.getElementById('news-content');
 const forecastWidget = document.getElementById('forecast-content');
 
-// Global variable to track the map marker (so we can remove old ones)
+// Global variable to track the map marker
 let currentMarker = null;
+
+// NEW: Global variable to store the "Real-Time" weather so we can revert back to it
+let savedCurrentWeather = null;
 
 // --- Initialize the Map ---
 mapboxgl.accessToken = config.MAPBOX_KEY;
@@ -23,7 +26,6 @@ map.addControl(new mapboxgl.NavigationControl());
 
 // --- Initial Page Load ---
 document.addEventListener('DOMContentLoaded', () => {
-    
     // 1. Load Dashboard
     updateDashboard("Singapore");
 
@@ -53,34 +55,26 @@ searchButton.addEventListener('click', () => {
 
 // --- Main Function to Update Everything ---
 function updateDashboard(query) {
-    // 1. Show loading spinner
     showLoading(weatherWidget);
     
-    // 2. API URL
     const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
-    // 3. Fetch
     fetch(weatherApiUrl)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Location not found');
-            }
+            if (!response.ok) throw new Error('Location not found');
             return response.json();
         })
         .then(data => {
+            // NEW: Save the current weather data globally
+            savedCurrentWeather = data;
+
             const lat = data.coord.lat;
             const lon = data.coord.lon;
 
-            // Update Widgets
             updateWeather(data); 
-            
-            // UPDATED: Pass temp and description to the map for the popup
             updateMap(lon, lat, data.name, data.main.temp, data.weather[0].description);
-            
             updateLocation(data.name, data.sys.country);
-            
-            // Trigger other updates
-            updateNews(data.name); // Pass City Name for Global News
+            updateNews(data.name); 
             updateForecast(lat, lon);
         })
         .catch(error => {
@@ -92,8 +86,7 @@ function updateDashboard(query) {
 
 // --- Helper Functions ---
 
-// 1. New Helper: Updates the Big Weather Display
-// We extracted this so we can call it when clicking forecast items too!
+// 1. Helper to render the main display
 function renderMainWeather(temp, description, icon, timeLabel = "") {
     const weatherHTML = `
         <div class="weather-info">
@@ -105,12 +98,11 @@ function renderMainWeather(temp, description, icon, timeLabel = "") {
     weatherWidget.innerHTML = weatherHTML;
 }
 
-// 2. Updated: Standard updateWeather just calls our new helper
+// 2. Updated: Calls the helper
 function updateWeather(data) {
     renderMainWeather(data.main.temp, data.weather[0].description, data.weather[0].icon);
 }
 
-// 3. Updated: Map function
 function updateMap(lon, lat, cityName, temp, description) {
     map.flyTo({ center: [lon, lat], zoom: 10, essential: true });
 
@@ -126,9 +118,9 @@ function updateMap(lon, lat, cityName, temp, description) {
 
     const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupHTML);
 
-    currentMarker = new mapboxgl.Marker({ color: "#007bff" })
+    currentMarker = new mapboxgl.Marker({ color: "#007bff" }) 
         .setLngLat([lon, lat])
-        .setPopup(popup)
+        .setPopup(popup) 
         .addTo(map);
 }
 
@@ -136,11 +128,10 @@ function updateLocation(name, country) {
     locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
 }
 
-// --- Global News Logic (With Smart Backup & Error Handling) ---
+// --- Global News Logic ---
 function updateNews(query) {
     showLoading(newsWidget);
 
-    // Search for news about the City Name (Global Scope)
     const newsApiUrl = `https://gnews.io/api/v4/search?q=${query}&lang=en&sortby=publishedAt&token=${config.GNEWS_KEY}&max=8`;
 
     fetch(newsApiUrl)
@@ -174,7 +165,7 @@ function updateNews(query) {
             console.error('Error fetching news:', error);
             console.log("Loading backup news data...");
             
-            // --- FALLBACK DATA (Smart Links) ---
+            // FALLBACK DATA
             const backupNews = [
                 {
                     title: `Breaking News: ${query} Tech Scene Booms`,
@@ -213,9 +204,7 @@ function updateNews(query) {
                 }
             ];
             
-            newsWidget.innerHTML = ""; // Clear spinner
-            
-            // Render the backup articles using the same HTML structure
+            newsWidget.innerHTML = ""; 
             backupNews.forEach(article => {
                 const date = new Date(article.publishedAt).toLocaleDateString();
                 const articleHTML = `
@@ -229,13 +218,11 @@ function updateNews(query) {
                 `;
                 newsWidget.innerHTML += articleHTML;
             });
-            
-            // Add the "Demo Data" disclaimer at the bottom
             newsWidget.innerHTML += `<p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 15px; padding-bottom: 10px;">(API Limit Reached: Showing Demo Data)</p>`;
         });
 }
 
-// --- Forecast Logic (With Click Highlighting) ---
+// --- Forecast Logic (Toggle Select/Deselect) ---
 function updateForecast(lat, lon) {
     showLoading(forecastWidget);
     document.getElementById('hourly-content').innerHTML = '<div class="spinner"></div>';
@@ -268,20 +255,22 @@ function updateForecast(lat, lon) {
                     <strong>${temp.toFixed(0)}°C</strong>
                 `;
 
-                // --- CLICK EVENT START ---
+                // --- TOGGLE CLICK EVENT ---
                 el.addEventListener('click', () => {
-                    // 1. Remove highlight from ALL items (hourly and daily)
-                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
-                        div.classList.remove('selected-weather');
-                    });
-
-                    // 2. Add highlight to THIS item
-                    el.classList.add('selected-weather');
-
-                    // 3. Update the main weather display
-                    renderMainWeather(temp, desc, icon, `(Forecast: ${timeStr})`);
+                    // Check if ALREADY selected
+                    if (el.classList.contains('selected-weather')) {
+                        // DESELECT: Remove class and Revert to Original Data
+                        el.classList.remove('selected-weather');
+                        updateWeather(savedCurrentWeather);
+                    } else {
+                        // SELECT: Clear others, Select this, Show Forecast Data
+                        document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
+                            div.classList.remove('selected-weather');
+                        });
+                        el.classList.add('selected-weather');
+                        renderMainWeather(temp, desc, icon, `(Forecast: ${timeStr})`);
+                    }
                 });
-                // --- CLICK EVENT END ---
 
                 hourlyContainer.appendChild(el);
             });
@@ -307,20 +296,19 @@ function updateForecast(lat, lon) {
                     <p class="temp">${temp.toFixed(0)}°C</p>
                 `;
 
-                // --- CLICK EVENT START ---
+                // --- TOGGLE CLICK EVENT ---
                 el.addEventListener('click', () => {
-                    // 1. Remove highlight from ALL items
-                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
-                        div.classList.remove('selected-weather');
-                    });
-
-                    // 2. Add highlight to THIS item
-                    el.classList.add('selected-weather');
-
-                    // 3. Update main display
-                    renderMainWeather(temp, desc, icon, `(Forecast: ${dayName})`);
+                    if (el.classList.contains('selected-weather')) {
+                        el.classList.remove('selected-weather');
+                        updateWeather(savedCurrentWeather);
+                    } else {
+                        document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
+                            div.classList.remove('selected-weather');
+                        });
+                        el.classList.add('selected-weather');
+                        renderMainWeather(temp, desc, icon, `(Forecast: ${dayName})`);
+                    }
                 });
-                // --- CLICK EVENT END ---
 
                 dailyContainer.appendChild(el);
             });
@@ -358,7 +346,6 @@ geoButton.addEventListener('click', () => {
         (position) => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            // Call our special function to handle coords
             updateDashboardByCoords(lat, lon);
         },
         (error) => {
@@ -368,7 +355,6 @@ geoButton.addEventListener('click', () => {
     );
 });
 
-// Special function to fetch weather using Coordinates
 function updateDashboardByCoords(lat, lon) {
     const weatherApiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
@@ -378,18 +364,13 @@ function updateDashboardByCoords(lat, lon) {
             return response.json();
         })
         .then(data => {
-            console.log("Location Data:", data);
+            // NEW: Save the current weather data globally here too
+            savedCurrentWeather = data;
             
             updateWeather(data);
-            
-            // UPDATED: Pass temp/desc for Map Popup
             updateMap(lon, lat, data.name, data.main.temp, data.weather[0].description);
-            
             updateLocation(data.name, data.sys.country);
-            
-            // UPDATED: Update News using the City Name we found
             updateNews(data.name); 
-            
             updateForecast(lat, lon);
         })
         .catch(error => {
@@ -439,7 +420,8 @@ searchInput.addEventListener('input', async () => {
                 li.addEventListener('click', () => {
                     searchInput.value = place.name; 
                     suggestionsList.style.display = 'none'; 
-                    updateDashboardByCoords(place.lat, place.lon);
+                    // Note: We could assume this matches the 'search' button logic for now
+                    updateDashboard(place.name); 
                 });
 
                 suggestionsList.appendChild(li);
