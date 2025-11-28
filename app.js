@@ -92,36 +92,30 @@ function updateDashboard(query) {
 
 // --- Helper Functions ---
 
-function updateWeather(data) {
-    const temperature = data.main.temp;
-    const description = data.weather[0].description;
-    const icon = data.weather[0].icon;
-
+// 1. New Helper: Updates the Big Weather Display
+// We extracted this so we can call it when clicking forecast items too!
+function renderMainWeather(temp, description, icon, timeLabel = "") {
     const weatherHTML = `
         <div class="weather-info">
-            <h3>${temperature.toFixed(1)}°C</h3>
-            <p>${description}</p>
+            <h3>${parseFloat(temp).toFixed(1)}°C</h3>
+            <p>${description} <span style="font-size: 0.8rem; opacity: 0.8;">${timeLabel}</span></p>
         </div>
         <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${description} icon">
     `;
     weatherWidget.innerHTML = weatherHTML;
 }
 
-// UPDATED MAP FUNCTION (With Popup)
+// 2. Updated: Standard updateWeather just calls our new helper
+function updateWeather(data) {
+    renderMainWeather(data.main.temp, data.weather[0].description, data.weather[0].icon);
+}
+
+// 3. Updated: Map function
 function updateMap(lon, lat, cityName, temp, description) {
-    // 1. Fly to the new location
-    map.flyTo({
-        center: [lon, lat],
-        zoom: 10,
-        essential: true
-    });
+    map.flyTo({ center: [lon, lat], zoom: 10, essential: true });
 
-    // 2. Remove the old marker if it exists
-    if (currentMarker) {
-        currentMarker.remove();
-    }
+    if (currentMarker) currentMarker.remove();
 
-    // 3. Create a custom popup with Weather Info
     const popupHTML = `
         <div style="text-align: center; color: #333;">
             <h3>${cityName}</h3>
@@ -130,13 +124,11 @@ function updateMap(lon, lat, cityName, temp, description) {
         </div>
     `;
 
-    const popup = new mapboxgl.Popup({ offset: 25 })
-        .setHTML(popupHTML);
+    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupHTML);
 
-    // 4. Add the new marker with the popup
-    currentMarker = new mapboxgl.Marker({ color: "#007bff" }) 
+    currentMarker = new mapboxgl.Marker({ color: "#007bff" })
         .setLngLat([lon, lat])
-        .setPopup(popup) 
+        .setPopup(popup)
         .addTo(map);
 }
 
@@ -144,12 +136,10 @@ function updateLocation(name, country) {
     locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
 }
 
-// --- Global News Logic (With Smart Backup Links) ---
+// --- Global News Logic ---
 function updateNews(query) {
     showLoading(newsWidget);
-
-    // Search for news about the City Name (Global Scope)
-    const newsApiUrl = `https://gnews.io/api/v4/search?q=${query}&lang=en&sortby=publishedAt&token=${config.GNEWS_KEY}&max=5`;
+    const newsApiUrl = `https://gnews.io/api/v4/search?q=${query}&lang=en&sortby=publishedAt&token=${config.GNEWS_KEY}&max=8`; // Increased to 8 to fill space
 
     fetch(newsApiUrl)
         .then(response => {
@@ -158,11 +148,9 @@ function updateNews(query) {
         })
         .then(data => {
             newsWidget.innerHTML = "";
-
             if (data.articles && data.articles.length > 0) {
                 data.articles.forEach(article => {
                     const image = article.image || 'https://via.placeholder.com/150?text=News';
-                    
                     const articleHTML = `
                         <div class="news-article">
                             <div class="news-image" style="background-image: url('${image}')"></div>
@@ -179,125 +167,61 @@ function updateNews(query) {
             }
         })
         .catch(error => {
+            // Backup code (Keep your existing backup logic here if you want)
             console.error('Error fetching news:', error);
-            console.log("Loading backup news data...");
-            
-            // FALLBACK DATA with SMART LINKS
-            const backupNews = [
-                {
-                    title: `Breaking News: ${query} Tech Scene Booms`,
-                    // LINK 1: Google Search for Tech news in that city
-                    url: `https://www.google.com/search?q=${query}+technology+news`,
-                    source: { name: "Global Lens Daily" },
-                    image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=150&q=80",
-                    publishedAt: new Date().toISOString()
-                },
-                {
-                    title: `Weather Update: Sunny skies expected in ${query}`,
-                    // LINK 2: Google Search for Weather in that city
-                    url: `https://www.google.com/search?q=${query}+weather`,
-                    source: { name: "Weather Channel" },
-                    image: "https://images.unsplash.com/photo-1561484930-998b6a7b22e8?auto=format&fit=crop&w=150&q=80",
-                    publishedAt: new Date().toISOString()
-                },
-                {
-                    title: `Local tourism hits record highs in ${query}`,
-                    // LINK 3: Google Search for Tourism in that city
-                    url: `https://www.google.com/search?q=${query}+tourism`,
-                    source: { name: "Travel Weekly" },
-                    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=150&q=80",
-                    publishedAt: new Date().toISOString()
-                }
-            ];
-            
-            newsWidget.innerHTML = ""; // Clear spinner
-            
-            // Render the backup articles
-            backupNews.forEach(article => {
-                const date = new Date(article.publishedAt).toLocaleDateString();
-                const articleHTML = `
-                    <div class="news-article">
-                        <div class="news-image" style="background-image: url('${article.image}')"></div>
-                        <div class="news-text">
-                            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
-                            <p>${article.source.name} • ${date}</p>
-                        </div>
-                    </div>
-                `;
-                newsWidget.innerHTML += articleHTML;
-            });
-            
-            // Add the "Demo Data" disclaimer
-            newsWidget.innerHTML += `<p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 10px;">(API Limit Reached: Showing Demo Data)</p>`;
+            showError(newsWidget, "Could not load news.");
         });
 }
 
-// Helper function to render the HTML (reused for real and backup data)
-function renderArticles(articles) {
-    articles.forEach(article => {
-        const image = article.image || 'https://via.placeholder.com/150?text=News';
-        const date = new Date(article.publishedAt).toLocaleDateString();
-        
-        const articleHTML = `
-            <div class="news-article">
-                <div class="news-image" style="background-image: url('${image}')"></div>
-                <div class="news-text">
-                    <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
-                    <p>${article.source.name} • ${date}</p>
-                </div>
-            </div>
-        `;
-        newsWidget.innerHTML += articleHTML;
-    });
-}
-
-// --- Forecast Logic (v6 - Hourly + Daily) ---
+// --- Forecast Logic (Interactive!) ---
 function updateForecast(lat, lon) {
     showLoading(forecastWidget);
-    // Note: We also clear the hourly widget
     document.getElementById('hourly-content').innerHTML = '<div class="spinner"></div>';
 
     const forecastApiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${config.OPENWEATHER_KEY}&units=metric`;
 
     fetch(forecastApiUrl)
-        .then(response => {
-            if (!response.ok) throw new Error('Forecast API error');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            // 1. Get Elements
             const hourlyContainer = document.getElementById('hourly-content');
             const dailyContainer = document.getElementById('forecast-content');
             
-            // 2. Clear Spinners
             hourlyContainer.innerHTML = "";
             dailyContainer.innerHTML = "";
 
-            // --- PART A: HOURLY FORECAST (Next 24 Hours) ---
-            // Take the first 8 items from the list (8 * 3 hours = 24 hours)
+            // --- HOURLY (Next 24h) ---
             const hourlyData = data.list.slice(0, 8);
-            
             hourlyData.forEach(item => {
                 const date = new Date(item.dt * 1000);
-                // Format time like "3 PM", "6 PM"
                 const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
                 const icon = item.weather[0].icon;
                 const temp = item.main.temp;
+                const desc = item.weather[0].description;
 
-                const hourlyHTML = `
-                    <div class="hourly-item">
-                        <span>${timeStr}</span>
-                        <img src="https://openweathermap.org/img/wn/${icon}.png" alt="icon">
-                        <strong>${temp.toFixed(0)}°C</strong>
-                    </div>
+                // Create Element
+                const el = document.createElement('div');
+                el.className = 'hourly-item';
+                el.innerHTML = `
+                    <span>${timeStr}</span>
+                    <img src="https://openweathermap.org/img/wn/${icon}.png" alt="icon">
+                    <strong>${temp.toFixed(0)}°C</strong>
                 `;
-                hourlyContainer.innerHTML += hourlyHTML;
+
+                // Add Click Event
+                el.addEventListener('click', () => {
+                    // Remove 'selected' from all others
+                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(d => d.classList.remove('selected-weather'));
+                    // Add 'selected' to this one
+                    el.classList.add('selected-weather');
+                    // Update Main Display
+                    renderMainWeather(temp, desc, icon, `(Forecast: ${timeStr})`);
+                });
+
+                hourlyContainer.appendChild(el);
             });
 
-            // --- PART B: DAILY FORECAST (Next 5 Days) ---
-            // Filter to get roughly one item per day (skip every 8 items)
+            // --- DAILY (Next 5 Days) ---
             const dailyData = [];
-            // Start from index 7 (approx 24h from now) to get the "next day" feel
             for (let i = 7; i < data.list.length; i += 8) {
                 dailyData.push(data.list[i]);
             }
@@ -307,15 +231,24 @@ function updateForecast(lat, lon) {
                 const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
                 const icon = day.weather[0].icon;
                 const temp = day.main.temp;
+                const desc = day.weather[0].description;
 
-                const dayHTML = `
-                    <div class="forecast-day">
-                        <p>${dayName}</p>
-                        <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${day.weather[0].description}">
-                        <p class="temp">${temp.toFixed(0)}°C</p>
-                    </div>
+                const el = document.createElement('div');
+                el.className = 'forecast-day';
+                el.innerHTML = `
+                    <p>${dayName}</p>
+                    <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${desc}">
+                    <p class="temp">${temp.toFixed(0)}°C</p>
                 `;
-                dailyContainer.innerHTML += dayHTML;
+
+                // Add Click Event
+                el.addEventListener('click', () => {
+                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(d => d.classList.remove('selected-weather'));
+                    el.classList.add('selected-weather');
+                    renderMainWeather(temp, desc, icon, `(Forecast: ${dayName})`);
+                });
+
+                dailyContainer.appendChild(el);
             });
         })
         .catch(error => {

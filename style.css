@@ -95,7 +95,7 @@ header {
 
 /* --- News Widget Styles --- */
 #news-content {
-    max-height: 350px; /* Give it a max height */
+    max-height: 400px; /* Give it a max height */
     overflow-y: auto;  /* Make it scrollable */
     padding-right: 10px; /* Add padding for the scrollbar */
 }
