@@ -173,7 +173,7 @@ function updateNews(query) {
         });
 }
 
-// --- Forecast Logic (Interactive!) ---
+// --- Forecast Logic (With Click Highlighting) ---
 function updateForecast(lat, lon) {
     showLoading(forecastWidget);
     document.getElementById('hourly-content').innerHTML = '<div class="spinner"></div>';
@@ -198,7 +198,6 @@ function updateForecast(lat, lon) {
                 const temp = item.main.temp;
                 const desc = item.weather[0].description;
 
-                // Create Element
                 const el = document.createElement('div');
                 el.className = 'hourly-item';
                 el.innerHTML = `
@@ -207,15 +206,20 @@ function updateForecast(lat, lon) {
                     <strong>${temp.toFixed(0)}°C</strong>
                 `;
 
-                // Add Click Event
+                // --- CLICK EVENT START ---
                 el.addEventListener('click', () => {
-                    // Remove 'selected' from all others
-                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(d => d.classList.remove('selected-weather'));
-                    // Add 'selected' to this one
+                    // 1. Remove highlight from ALL items (hourly and daily)
+                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
+                        div.classList.remove('selected-weather');
+                    });
+
+                    // 2. Add highlight to THIS item
                     el.classList.add('selected-weather');
-                    // Update Main Display
+
+                    // 3. Update the main weather display
                     renderMainWeather(temp, desc, icon, `(Forecast: ${timeStr})`);
                 });
+                // --- CLICK EVENT END ---
 
                 hourlyContainer.appendChild(el);
             });
@@ -241,12 +245,20 @@ function updateForecast(lat, lon) {
                     <p class="temp">${temp.toFixed(0)}°C</p>
                 `;
 
-                // Add Click Event
+                // --- CLICK EVENT START ---
                 el.addEventListener('click', () => {
-                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(d => d.classList.remove('selected-weather'));
+                    // 1. Remove highlight from ALL items
+                    document.querySelectorAll('.hourly-item, .forecast-day').forEach(div => {
+                        div.classList.remove('selected-weather');
+                    });
+
+                    // 2. Add highlight to THIS item
                     el.classList.add('selected-weather');
+
+                    // 3. Update main display
                     renderMainWeather(temp, desc, icon, `(Forecast: ${dayName})`);
                 });
+                // --- CLICK EVENT END ---
 
                 dailyContainer.appendChild(el);
             });

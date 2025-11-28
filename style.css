@@ -531,3 +531,27 @@ body.dark-mode .hourly-item strong {
 body.dark-mode h4 {
     color: #bbb !important;
 }
+
+/* --- Active Click Effect Styles --- */
+
+/* Default (Light Mode) Highlight */
+.selected-weather {
+    background-color: #dbeafe !important; /* Light blue background */
+    border: 2px solid #3b82f6 !important; /* Bright blue border */
+    transform: scale(1.05); /* Keep it slightly popped out */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Dark Mode Highlight */
+body.dark-mode .selected-weather {
+    background-color: #1e3a8a !important; /* Dark blue background */
+    border-color: #60a5fa !important; /* Lighter blue border */
+    color: #ffffff;
+}
+
+/* Ensure text inside selected items is readable */
+.selected-weather p, 
+.selected-weather span, 
+.selected-weather strong {
+    color: inherit; /* Inherit the improved contrast color */
+}
