@@ -1,5 +1,5 @@
 # Global Lens Dashboard 👁️🌍
-
+**Github Page Link** https://kaeuss.github.io/local-lens/ <br><br>
 **Global Lens** is an interactive, API-driven dashboard designed to provide an instant, hyper-local snapshot of any location on Earth. By aggregating real-time weather data, interactive mapping, and localized news headlines into a single interface, Global Lens creates a seamless "command center" for global awareness.
 
 In a world where information is fragmented across weather apps, map services, and news portals, Global Lens unifies these streams. Whether you are a traveler planning a trip to Tokyo, a commuter checking the rain in Singapore, or a digital nomad scouting a new city, this application delivers the essential context you need in seconds.
