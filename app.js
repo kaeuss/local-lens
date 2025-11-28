@@ -136,10 +136,12 @@ function updateLocation(name, country) {
     locationDisplay.innerHTML = `<h3>Displaying: ${name}, ${country}</h3>`;
 }
 
-// --- Global News Logic ---
+// --- Global News Logic (With Smart Backup & Error Handling) ---
 function updateNews(query) {
     showLoading(newsWidget);
-    const newsApiUrl = `https://gnews.io/api/v4/search?q=${query}&lang=en&sortby=publishedAt&token=${config.GNEWS_KEY}&max=8`; // Increased to 8 to fill space
+
+    // Search for news about the City Name (Global Scope)
+    const newsApiUrl = `https://gnews.io/api/v4/search?q=${query}&lang=en&sortby=publishedAt&token=${config.GNEWS_KEY}&max=8`;
 
     fetch(newsApiUrl)
         .then(response => {
@@ -148,9 +150,11 @@ function updateNews(query) {
         })
         .then(data => {
             newsWidget.innerHTML = "";
+
             if (data.articles && data.articles.length > 0) {
                 data.articles.forEach(article => {
                     const image = article.image || 'https://via.placeholder.com/150?text=News';
+                    
                     const articleHTML = `
                         <div class="news-article">
                             <div class="news-image" style="background-image: url('${image}')"></div>
@@ -167,9 +171,67 @@ function updateNews(query) {
             }
         })
         .catch(error => {
-            // Backup code (Keep your existing backup logic here if you want)
             console.error('Error fetching news:', error);
-            showError(newsWidget, "Could not load news.");
+            console.log("Loading backup news data...");
+            
+            // --- FALLBACK DATA (Smart Links) ---
+            const backupNews = [
+                {
+                    title: `Breaking News: ${query} Tech Scene Booms`,
+                    url: `https://www.google.com/search?q=${query}+technology+news`,
+                    source: { name: "Global Lens Daily" },
+                    image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                },
+                {
+                    title: `Weather Update: Sunny skies expected in ${query}`,
+                    url: `https://www.google.com/search?q=${query}+weather`,
+                    source: { name: "Weather Channel" },
+                    image: "https://images.unsplash.com/photo-1561484930-998b6a7b22e8?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                },
+                {
+                    title: `Local tourism hits record highs in ${query}`,
+                    url: `https://www.google.com/search?q=${query}+tourism`,
+                    source: { name: "Travel Weekly" },
+                    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                },
+                {
+                    title: `Market Watch: ${query} business sector grows`,
+                    url: `https://www.google.com/search?q=${query}+economy`,
+                    source: { name: "Financial Times" },
+                    image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                },
+                {
+                    title: `Cultural Festival announced for downtown ${query}`,
+                    url: `https://www.google.com/search?q=${query}+events`,
+                    source: { name: "City Guide" },
+                    image: "https://images.unsplash.com/photo-1533174072545-e8d4aa97edf9?auto=format&fit=crop&w=150&q=80",
+                    publishedAt: new Date().toISOString()
+                }
+            ];
+            
+            newsWidget.innerHTML = ""; // Clear spinner
+            
+            // Render the backup articles using the same HTML structure
+            backupNews.forEach(article => {
+                const date = new Date(article.publishedAt).toLocaleDateString();
+                const articleHTML = `
+                    <div class="news-article">
+                        <div class="news-image" style="background-image: url('${article.image}')"></div>
+                        <div class="news-text">
+                            <h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+                            <p>${article.source.name} • ${date}</p>
+                        </div>
+                    </div>
+                `;
+                newsWidget.innerHTML += articleHTML;
+            });
+            
+            // Add the "Demo Data" disclaimer at the bottom
+            newsWidget.innerHTML += `<p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 15px; padding-bottom: 10px;">(API Limit Reached: Showing Demo Data)</p>`;
         });
 }
 
