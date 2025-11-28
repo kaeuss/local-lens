@@ -53,6 +53,20 @@ searchButton.addEventListener('click', () => {
     }
 });
 
+// --- Set up the "Enter" key listener for the input box ---
+searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const query = searchInput.value;
+        if (query) {
+            updateDashboard(query);
+            // Also hide the autocomplete suggestions if they are open
+            if (suggestionsList) {
+                suggestionsList.style.display = 'none';
+            }
+        }
+    }
+});
+
 // --- Main Function to Update Everything ---
 function updateDashboard(query) {
     showLoading(weatherWidget);
