@@ -410,26 +410,26 @@ body.dark-mode #forecast-content:hover::-webkit-scrollbar-thumb { background-col
 /* =========================================
    9. MOBILE RESPONSIVENESS (Refined)
    ========================================= */
-@media (max-width: 480px) { /* Matched your requested breakpoint */
+@media (max-width: 480px) { 
     body {
-        margin: 1rem;
+        margin: 1rem; /* Less margin on mobile */
     }
     
     /* Control Bar Stacking */
     .control-bar {
         flex-wrap: wrap; 
         border-radius: 20px; 
-        padding: 15px;
-        gap: 10px;
+        padding: 10px; /* Tighter padding */
+        gap: 8px;
         justify-content: center;
-        margin-bottom: 2rem; /* Add space below the control bar itself */
+        margin-bottom: 1.5rem; 
     }
     
     .search-wrapper {
         width: 100%;
         margin-bottom: 5px;
         border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
+        padding-bottom: 8px;
         flex: 0 0 100%;
     }
     
@@ -439,39 +439,52 @@ body.dark-mode #forecast-content:hover::-webkit-scrollbar-thumb { background-col
 
     .divider { display: none; }
 
-    #geo-button { flex: 0 0 50px; }
+    #geo-button { flex: 0 0 45px; height: 35px; } /* Smaller button */
     #switch-wrapper { flex: 0 0 auto; }
-    #search-button { flex-grow: 1; }
+    #search-button { flex-grow: 1; height: 35px; padding: 0; } /* Smaller button */
     
     /* DASHBOARD GRID - Force gaps and single column */
     .dashboard-grid { 
         display: flex;
-        flex-direction: column;
-        gap: 2rem; /* Ensure 32px gap between widgets */
+        flex-direction: column; /* Stack vertically */
+        gap: 15px; /* Tighter 15px gap (was 24px) */
     }
 
-    /* WIDGET STYLING - Allow natural height, prevent overlap */
+    /* WIDGET STYLING - Compact & Natural Height */
     .widget { 
         height: auto !important; 
         min-height: 0; 
         overflow: visible; 
-        margin-bottom: 1rem; /* Extra safety margin to prevent sticking */
+        margin-bottom: 0; 
         flex: 0 0 auto; 
+        padding: 15px; /* Reduced padding (was 1rem/16px) */
     }
 
-    /* LIMIT NEWS HEIGHT ON MOBILE */
+    /* WIDGET HEADERS - Save space */
+    .widget h2 {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+    }
+
+    /* LIMIT NEWS HEIGHT ON MOBILE - Makes the widget shorter */
     #news-content {
-        max-height: 300px; /* Shorter scroll area for mobile */
+        max-height: 200px; /* Much shorter scroll area */
+        min-height: 100px;
     }
 
-    /* MAP HEIGHT */
+    /* MAP HEIGHT - Makes the map widget shorter */
     #map { 
-        height: 250px; 
-        min-height: 250px; 
+        height: 200px; /* Shorter map */
+        min-height: 200px; 
     }
     
     /* Forecast Padding */
     #hourly-content, #forecast-content {
-        padding-bottom: 20px; 
+        padding-bottom: 10px; /* Tighter scrollbar spacing */
+        margin-bottom: 5px;
     }
+    
+    /* Weather Text Size Fix */
+    #weather-content .weather-info h3 { font-size: 2rem; }
 }
